@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ name }}" />
+{% endblock %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+    <ul>
+        {% for post in group.posts %}
+            <li><a href="{{ post.permalink_url }}">{{ post.message }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

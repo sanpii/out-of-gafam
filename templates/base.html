@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Out Of Facebook</title>
+        <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/static/css/main.css" />
+        {% block head %}{% endblock %}
+    </head>
+    <body class="text-center">
+        <div class="content">
+            <img class="mb-4" src="/static/img/logo.png" />
+
+            <h1 class="h3 mb-3 font-weight-normal">{% block title %}Out Of Here{% endblock %}</h1>
+
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
