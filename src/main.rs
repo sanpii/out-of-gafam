@@ -27,6 +27,7 @@ fn main()
             .resource("/search", |r| r.with(search))
             .resource("/show/{name}", |r| r.f(show))
             .resource("/feed/{name}", |r| r.f(feed))
+            .resource("/about", |r| r.get().with(about))
             .handler("/static", static_files)
     })
     .bind("127.0.0.1:8000")
@@ -92,5 +93,16 @@ fn feed(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Respo
 
     ::actix_web::HttpResponse::Ok()
         .content_type("application/rss+xml; charset=utf-8")
+        .body(body)
+}
+
+fn about(state: ::actix_web::State<AppState>) -> impl ::actix_web::Responder
+{
+    let body = state.template
+        .render("about.html", &tera::Context::new())
+        .unwrap();
+
+    ::actix_web::HttpResponse::Ok()
+        .content_type("text/html")
         .body(body)
 }
