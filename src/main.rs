@@ -63,15 +63,7 @@ fn search(params: ::actix_web::Form<Params>) -> impl ::actix_web::Responder
 
 fn show(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
 {
-    let name = &request.match_info()["name"];
-    let fb = crate::facebook::Facebook::new();
-
-    let mut context = tera::Context::new();
-    context.insert("group", &fb.group(name));
-
-    let body = request.state().template
-        .render("show.html", &context)
-        .unwrap();
+    let body = body(request, "show.html");
 
     ::actix_web::HttpResponse::Ok()
         .content_type("text/html")
@@ -80,6 +72,15 @@ fn show(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Respo
 
 fn feed(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
 {
+    let body = body(request, "feed.xml");
+
+    ::actix_web::HttpResponse::Ok()
+        .content_type("application/rss+xml; charset=utf-8")
+        .body(body)
+}
+
+fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> String
+{
     let name = &request.match_info()["name"];
     let fb = crate::facebook::Facebook::new();
 
@@ -87,13 +88,9 @@ fn feed(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Respo
     context.insert("name", &name);
     context.insert("group", &fb.group(name));
 
-    let body = request.state().template
-        .render("rss.xml", &context)
-        .unwrap();
-
-    ::actix_web::HttpResponse::Ok()
-        .content_type("application/rss+xml; charset=utf-8")
-        .body(body)
+    request.state().template
+        .render(template, &context)
+        .unwrap()
 }
 
 fn about(state: ::actix_web::State<AppState>) -> impl ::actix_web::Responder
