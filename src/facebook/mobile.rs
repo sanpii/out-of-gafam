@@ -66,14 +66,18 @@ impl super::Api for Mobile
 
         let mut group = super::Group {
             id: id.to_string(),
-            name: Self::og(&html, "title")?,
-            description: Self::og(&html, "description")?,
-            url: Self::og(&html, "url")?,
-            image: Self::og(&html, "image")?,
+            name: Self::og(&html, "title")
+                .unwrap_or(id.to_string()),
+            description: Self::og(&html, "description")
+                .ok(),
+            url: Self::og(&html, "url")
+                .unwrap_or(format!("https://mobile.facebook.com/{}", id)),
+            image: Self::og(&html, "image")
+                .ok(),
             posts: vec![],
         };
 
-        let article_selector = ::scraper::Selector::parse("#recent > div > div > div[data-ft]")
+        let article_selector = ::scraper::Selector::parse("div[data-ft]")
             .unwrap();
         let title_selector = ::scraper::Selector::parse("h3")
             .unwrap();

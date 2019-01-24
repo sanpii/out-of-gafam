@@ -33,8 +33,8 @@ fn main()
             .middleware(errors)
             .resource("/", |r| r.get().with(index))
             .resource("/search", |r| r.post().with(search))
-            .resource("/show/{name}", |r| r.get().f(show))
-            .resource("/feed/{name}", |r| r.get().f(feed))
+            .resource("/show/{name:.*}", |r| r.get().f(show))
+            .resource("/feed/{name:.*}", |r| r.get().f(feed))
             .resource("/about", |r| r.get().with(about))
             .handler("/static", static_files)
     })
@@ -57,7 +57,7 @@ fn index(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
 
 fn search(params: ::actix_web::Form<Params>) -> ::actix_web::HttpResponse
 {
-    let re = ::regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>[^/]+)")
+    let re = ::regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
         .unwrap();
 
     let name = match re.captures(&params.account) {

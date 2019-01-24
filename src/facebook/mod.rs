@@ -7,9 +7,9 @@ mod graph;
 pub struct Group {
     pub id: String,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub url: String,
-    pub image: String,
+    pub image: Option<String>,
     pub posts: Vec<Post>,
 }
 

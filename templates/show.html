@@ -6,7 +6,12 @@
 {% endblock %}
 
 {% block title %}<a href="{{ group.url | safe }}">{{ group.name }}</a>{% endblock %}
-{% block logo %}{{ group.image | safe }}{% endblock %}
+
+{% block logo %}
+    {% if group.image %}
+        <img class="mb-4" src="{{ group.image | safe }}" />
+    {% endif %}
+{% endblock %}
 
 {% block content %}
     <ul class="posts">

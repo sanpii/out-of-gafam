@@ -37,8 +37,9 @@
         <main>
             <div class="container">
                 <div class="logo">
-                    <img class="mb-4" src="{% block logo %}/static/img/logo.png{% endblock %}" />
-
+                    {% block logo %}
+                        <img class="mb-4" src="/static/img/logo.png" />
+                    {% endblock %}
                     <h1 class="h3 mb-3 font-weight-normal">{% block title %}{% endblock %}</h1>
                 </div>
 

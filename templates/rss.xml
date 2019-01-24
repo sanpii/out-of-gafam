@@ -2,18 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>{{ group.name }}</title>
-        <description><![CDATA[{{ group.description | safe }}]]></description>
+        {% if group.description %}
+            <description><![CDATA[{{ group.description | safe }}]]></description>
+        {% endif %}
         <link><![CDATA[{{ group.url | safe }}]]></link>
-        <image><![CDATA[{{ group.image | safe }}]]></image>
+        {% if group.image %}
+            <image><![CDATA[{{ group.image | safe }}]]></image>
+        {% endif %}
         {% for post in group.posts %}
-        <item>
-            <title>{{ post.name | safe }}</title>
-            <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
-            <description><![CDATA[{{ post.message | safe }}]]></description>
-            <pubDate>{{ post.created_time }}</pubDate>
-            <guid>{{ post.id }}</guid>
-            <author>{{ group.name }}</author>
-        </item>
+            <item>
+                <title>{{ post.name | safe }}</title>
+                <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
+                <description><![CDATA[{{ post.message | safe }}]]></description>
+                <pubDate>{{ post.created_time }}</pubDate>
+                <guid>{{ post.id }}</guid>
+                <author>{{ group.name }}</author>
+            </item>
         {% endfor %}
     </channel>
 </rss>
