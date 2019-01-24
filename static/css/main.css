@@ -1,6 +1,4 @@
 body {
-    padding-top: 40px;
-    padding-bottom: 40px;
     background-color: #f5f5f5;
 }
 
@@ -8,11 +6,17 @@ body {
     text-align: center;
 }
 
-.content {
-    width: 100%;
-    max-width: 1024px;
-    padding: 15px;
-    margin: auto;
+main > .container {
+  padding: 80px 15px 0;
+}
+
+footer {
+    background-color: gray;
+}
+
+.footer > .container {
+    padding-right: 15px;
+    padding-left: 15px;
 }
 
 form {
@@ -34,4 +38,21 @@ form input {
 
 .btn-primary {
     background-color: #3b579d;
+}
+
+a {
+    color: #3b579d;
+}
+
+ul.posts {
+    list-style-type: none;
+    background-color: white;
+    padding: 40px;
+}
+
+li.post {
+    border-radius: 3px;
+    border: 1px solid #e5e5e5;
+    margin: 12px;
+    padding: 12px;
 }

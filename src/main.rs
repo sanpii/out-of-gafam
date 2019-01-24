@@ -84,7 +84,7 @@ fn show(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpRespon
 
 fn feed(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpResponse
 {
-    let body = match body(request, "feed.xml") {
+    let body = match body(request, "rss.xml") {
         Ok(body) => body,
         Err(err) => return err.into(),
     };

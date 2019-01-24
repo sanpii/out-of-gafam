@@ -2,15 +2,16 @@
 
 {% block head %}
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ group.id }}" />
+<link href="/static/lib/Font-Awesome/css/all.min.css" rel="stylesheet" />
 {% endblock %}
 
 {% block title %}<a href="{{ group.url | safe }}">{{ group.name }}</a>{% endblock %}
 {% block logo %}{{ group.image | safe }}{% endblock %}
 
 {% block content %}
-    <ul>
+    <ul class="posts">
         {% for post in group.posts %}
-            <li>
+            <li class="post">
                 {{ post.name | safe }}
                 <div>
                     {{ post.message | safe }}

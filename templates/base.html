@@ -6,15 +6,44 @@
         <link rel="stylesheet" href="/static/css/main.css" />
         {% block head %}{% endblock %}
     </head>
-    <body>
-        <div class="content">
-            <div class="logo">
-                <img class="mb-4" src="{% block logo %}/static/img/logo.png{% endblock %}" />
+    <body class="d-flex flex-column h-100">
+        <header>
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                <a class="navbar-brand" href="#">Out Of Facebook</a>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about">About</a>
+                        </li>
 
-                <h1 class="h3 mb-3 font-weight-normal">{% block title %}Out Of Facebook{% endblock %}</h1>
+                    </ul>
+
+                    {% if group.id is defined %}
+                        <ul class="navbar-nav mt-2 mt-md-0">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/feed/{{ group.id }}">
+                                    <i class="fas fa-rss"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div class="container">
+                <div class="logo">
+                    <img class="mb-4" src="{% block logo %}/static/img/logo.png{% endblock %}" />
+
+                    <h1 class="h3 mb-3 font-weight-normal">{% block title %}{% endblock %}</h1>
+                </div>
+
+                {% block content %}{% endblock %}
             </div>
-
-            {% block content %}{% endblock %}
-        </div>
+        </main>
     </body>
 </html>
