@@ -14,9 +14,9 @@ impl Graph
 
 impl super::Api for Graph
 {
-    fn group(&self, name: &str) -> super::Group
+    fn group(&self, name: &str) -> crate::Result<super::Group>
     {
-        super::Group {
+        let group = super::Group {
             id: name.to_string(),
             name: name.to_string(),
             description: name.to_string(),
@@ -31,6 +31,8 @@ impl super::Api for Graph
                     id: "703".to_string(),
                 }
             ],
-        }
+        };
+
+        Ok(group)
     }
 }

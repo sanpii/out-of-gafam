@@ -4,6 +4,10 @@ extern crate serde_derive;
 extern crate tera;
 
 mod facebook;
+mod error;
+
+use error::Error;
+use error::Result;
 
 struct AppState {
     template: ::tera::Tera,
@@ -35,18 +39,19 @@ fn main()
     .run();
 }
 
-fn index(state: ::actix_web::State<AppState>) -> impl ::actix_web::Responder
+fn index(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
 {
-    let body = state.template
-        .render("index.html", &tera::Context::new())
-        .unwrap();
+    let body = match state.template.render("index.html", &tera::Context::new()) {
+        Ok(body) => body,
+        Err(err) => return error(err.into()),
+    };
 
     ::actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
 }
 
-fn search(params: ::actix_web::Form<Params>) -> impl ::actix_web::Responder
+fn search(params: ::actix_web::Form<Params>) -> ::actix_web::HttpResponse
 {
     let re = ::regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>[^/]+)")
         .unwrap();
@@ -61,45 +66,71 @@ fn search(params: ::actix_web::Form<Params>) -> impl ::actix_web::Responder
         .finish()
 }
 
-fn show(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
+fn show(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpResponse
 {
-    let body = body(request, "show.html");
+    let body = match body(request, "show.html") {
+        Ok(body) => body,
+        Err(err) => return error(err.into()),
+    };
 
     ::actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
 }
 
-fn feed(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
+fn feed(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpResponse
 {
-    let body = body(request, "feed.xml");
+    let body = match body(request, "feed.xml") {
+        Ok(body) => body,
+        Err(err) => return error(err.into()),
+    };
 
     ::actix_web::HttpResponse::Ok()
         .content_type("application/rss+xml; charset=utf-8")
         .body(body)
 }
 
-fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> String
+fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> Result<String>
 {
     let name = &request.match_info()["name"];
     let fb = crate::facebook::Facebook::new();
 
-    let mut context = tera::Context::new();
-    context.insert("name", &name);
-    context.insert("group", &fb.group(name));
+    use crate::facebook::Api;
+    let group = fb.group(name)?;
 
-    request.state().template
-        .render(template, &context)
-        .unwrap()
+    let mut context = tera::Context::new();
+    context.insert("group", &group);
+
+    match request.state().template.render(template, &context) {
+        Ok(body) => Ok(body),
+        Err(err) => Err(err.into()),
+    }
 }
 
-fn about(state: ::actix_web::State<AppState>) -> impl ::actix_web::Responder
+fn about(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
 {
-    let body = state.template
-        .render("about.html", &tera::Context::new())
-        .unwrap();
+    let body = match state.template.render("about.html", &tera::Context::new()) {
+        Ok(body) => body,
+        Err(err) => return error(err.into()),
+    };
 
     ::actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
+}
+
+fn error(err: Error) -> ::actix_web::HttpResponse
+{
+    use actix_web::http::StatusCode;
+
+    let status = match err {
+        Error::NotFound => StatusCode::NOT_FOUND,
+        Error::Template(err) => {
+            eprintln!("{:#?}", err);
+
+            StatusCode::INTERNAL_SERVER_ERROR
+        },
+    };
+
+    ::actix_web::HttpResponse::new(status)
 }

@@ -9,15 +9,20 @@ impl Mobile
         }
     }
 
-    fn og(html: &::scraper::html::Html, name: &str) -> String
+    fn og(html: &::scraper::html::Html, name: &str) -> crate::Result<String>
     {
         let s = format!("html > head > meta[property=\"og:{}\"]", name);
         let selector = ::scraper::Selector::parse(&s)
             .unwrap();
 
-        match html.select(&selector).nth(0) {
-            Some(e) => e.value().attr("content").unwrap().to_string(),
-            None => panic!(),
+        let element = match html.select(&selector).nth(0) {
+            Some(element) => element,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        match element.value().attr("content") {
+            Some(content) => Ok(content.to_string()),
+            None => Err(crate::Error::NotFound),
         }
     }
 
@@ -38,33 +43,33 @@ impl Mobile
 
 impl Mobile
 {
-    fn get(&self, id: &str) -> String
+    fn get(&self, id: &str) -> crate::Result<String>
     {
         let url = format!("https://mobile.facebook.com/{}", id);
         let client = ::reqwest::Client::new();
 
-        client.get(&url)
+        let contents = client.get(&url)
             .header(::reqwest::header::USER_AGENT, "Mozilla")
-            .send()
-            .unwrap()
-            .text()
-            .unwrap()
+            .send()?
+            .text()?;
+
+        Ok(contents)
     }
 }
 
 impl super::Api for Mobile
 {
-    fn group(&self, id: &str) -> super::Group
+    fn group(&self, id: &str) -> crate::Result<super::Group>
     {
-        let contents = self.get(id);
+        let contents = self.get(id)?;
         let html = ::scraper::Html::parse_document(&contents);
 
         let mut group = super::Group {
             id: id.to_string(),
-            name: Self::og(&html, "title"),
-            description: Self::og(&html, "description"),
-            url: Self::og(&html, "url"),
-            image: Self::og(&html, "image"),
+            name: Self::og(&html, "title")?,
+            description: Self::og(&html, "description")?,
+            url: Self::og(&html, "url")?,
+            image: Self::og(&html, "image")?,
             posts: vec![],
         };
 
@@ -98,16 +103,14 @@ impl super::Api for Mobile
             };
 
             let permalink_url = match element.select(&link_selector).nth(0) {
-                Some(e) => self.rewrite_url(e.value().attr("href").unwrap()),
+                Some(e) => self.rewrite_url(e.value().attr("href").unwrap_or_default()),
                 None => continue,
             };
 
-            let id = id_regex.captures(&permalink_url)
-                .unwrap()
-                .get(1)
-                .unwrap()
-                .as_str()
-                .to_string();
+            let id = match id_regex.captures(&permalink_url) {
+                Some(caps) => caps[1].to_string(),
+                None => continue,
+            };
 
             let post = super::Post {
                 name,
@@ -120,6 +123,6 @@ impl super::Api for Mobile
             group.posts.push(post);
         }
 
-        group
+        Ok(group)
     }
 }

@@ -3,7 +3,7 @@ mod mobile;
 #[cfg(not(feature = "no-api"))]
 mod graph;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Group {
     pub id: String,
     pub name: String,
@@ -13,7 +13,7 @@ pub struct Group {
     pub posts: Vec<Post>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Post {
     pub id: String,
     pub name: String,
@@ -22,8 +22,8 @@ pub struct Post {
     pub created_time: String,
 }
 
-trait Api {
-    fn group(&self, name: &str) -> self::Group;
+pub trait Api {
+    fn group(&self, name: &str) -> crate::Result<self::Group>;
 }
 
 pub struct Facebook {
@@ -50,8 +50,11 @@ impl Facebook
     {
         self::graph::Graph::new("token")
     }
+}
 
-    pub fn group(&self, name: &str) -> Group
+impl Api for Facebook
+{
+    fn group(&self, name: &str) -> crate::Result<self::Group>
     {
         self.api.group(name)
     }
