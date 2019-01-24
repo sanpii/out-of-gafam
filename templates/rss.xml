@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>{{ name }}</title>
+        <title>{{ group.name }}</title>
+        <description><![CDATA[{{ group.description | safe }}]]></description>
+        <link><![CDATA[{{ group.url | safe }}]]></link>
+        <image><![CDATA[{{ group.image | safe }}]]></image>
         {% for post in group.posts %}
-            <item>
-                <title>{{ post.name }}</title>
-                <link>{{ post.permalink_url }}</link>
-                <description><![CDATA[{{ post.message }}]]></description>
-                <pubDate>{{ post.created_time }}</pubDate>
-                <guid>{{ post.id }}</guid>
-                <image>{{ post.picture }}</image>
-                <author>{{ post.from.name }}</author>
-            </item>
+        <item>
+            <title>{{ post.name | safe }}</title>
+            <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
+            <description><![CDATA[{{ post.message | safe }}]]></description>
+            <pubDate>{{ post.created_time }}</pubDate>
+            <guid>{{ post.id }}</guid>
+            <author>{{ group.name }}</author>
+        </item>
         {% endfor %}
     </channel>
 </rss>

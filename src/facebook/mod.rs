@@ -1,0 +1,58 @@
+#[cfg(feature = "no-api")]
+mod mobile;
+#[cfg(not(feature = "no-api"))]
+mod graph;
+
+#[derive(Serialize)]
+pub struct Group {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub url: String,
+    pub image: String,
+    pub posts: Vec<Post>,
+}
+
+#[derive(Serialize)]
+pub struct Post {
+    pub id: String,
+    pub name: String,
+    pub permalink_url: String,
+    pub message: String,
+    pub created_time: String,
+}
+
+trait Api {
+    fn group(&self, name: &str) -> self::Group;
+}
+
+pub struct Facebook {
+    api: Box<Api>,
+}
+
+impl Facebook
+{
+    pub fn new() -> Self
+    {
+        Facebook {
+            api: Box::new(Self::api()),
+        }
+    }
+
+    #[cfg(feature = "no-api")]
+    fn api() -> impl Api
+    {
+        self::mobile::Mobile::new()
+    }
+
+    #[cfg(not(feature = "no-api"))]
+    fn api() -> impl Api
+    {
+        self::graph::Graph::new("token")
+    }
+
+    pub fn group(&self, name: &str) -> Group
+    {
+        self.api.group(name)
+    }
+}

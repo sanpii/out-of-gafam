@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ name }}" />
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ group.id }}" />
 {% endblock %}
 
-{% block title %}{{ group.name }}{% endblock %}
+{% block title %}<a href="{{ group.url | safe }}">{{ group.name }}</a>{% endblock %}
+{% block logo %}{{ group.image | safe }}{% endblock %}
 
 {% block content %}
     <ul>
         {% for post in group.posts %}
-            <li><a href="{{ post.permalink_url }}">{{ post.message }}</a></li>
+            <li>
+                {{ post.name | safe }}
+                <div>
+                    {{ post.message | safe }}
+                </div>
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}

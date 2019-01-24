@@ -9,6 +9,11 @@ struct AppState {
     template: ::tera::Tera,
 }
 
+#[derive(Deserialize)]
+struct Params {
+    account: String,
+}
+
 fn main()
 {
     ::actix_web::server::new(|| {
@@ -18,7 +23,8 @@ fn main()
             .expect("failed constructing static files handler");
 
         ::actix_web::App::with_state(state)
-            .resource("/", |r| r.f(index))
+            .resource("/", |r| r.with(index))
+            .resource("/search", |r| r.with(search))
             .resource("/show/{name}", |r| r.f(show))
             .resource("/feed/{name}", |r| r.f(feed))
             .resource("/privacy", |r| r.f(privacy))
@@ -29,40 +35,38 @@ fn main()
     .run();
 }
 
-fn index(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
+fn index(state: ::actix_web::State<AppState>) -> impl ::actix_web::Responder
 {
-    match request.method().as_str() {
-        "GET" => {
-            let body = request.state().template
-                .render("index.html", &tera::Context::new())
-                .unwrap();
+    let body = state.template
+        .render("index.html", &tera::Context::new())
+        .unwrap();
 
-            ::actix_web::HttpResponse::Ok()
-                .content_type("text/html")
-                .body(body)
-        },
-        "POST" => {
-            let re = ::regex::Regex::new(r"https?://www.facebook.com/(?P<name>[^/]+)")
-                .unwrap();
-            let caps = re.captures("https://www.facebook.com/streetmedicsnantes")
-                .unwrap();
+    ::actix_web::HttpResponse::Ok()
+        .content_type("text/html")
+        .body(body)
+}
 
-            ::actix_web::HttpResponse::Found()
-                .header(::actix_web::http::header::LOCATION, format!("/show/{}", &caps["name"]))
-                .finish()
-        },
-        _ => ::actix_web::HttpResponse::BadRequest()
-            .finish(),
-    }
+fn search(params: ::actix_web::Form<Params>) -> impl ::actix_web::Responder
+{
+    let re = ::regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>[^/]+)")
+        .unwrap();
+
+    let name = match re.captures(&params.account) {
+        Some(caps) => caps["name"].to_string(),
+        None => params.account.clone(),
+    };
+
+    ::actix_web::HttpResponse::Found()
+        .header(::actix_web::http::header::LOCATION, format!("/show/{}", name))
+        .finish()
 }
 
 fn show(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
 {
     let name = &request.match_info()["name"];
-    let fb = crate::facebook::Facebook::new("token");
+    let fb = crate::facebook::Facebook::new();
 
     let mut context = tera::Context::new();
-    context.insert("name", &name);
     context.insert("group", &fb.group(name));
 
     let body = request.state().template
@@ -77,7 +81,7 @@ fn show(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Respo
 fn feed(request: &::actix_web::HttpRequest<AppState>) -> impl ::actix_web::Responder
 {
     let name = &request.match_info()["name"];
-    let fb = crate::facebook::Facebook::new("token");
+    let fb = crate::facebook::Facebook::new();
 
     let mut context = tera::Context::new();
     context.insert("name", &name);
