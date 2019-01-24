@@ -25,8 +25,12 @@ fn main()
         let state = AppState { template };
         let static_files = ::actix_web::fs::StaticFiles::new("static/")
             .expect("failed constructing static files handler");
+        let errors = ::actix_web::middleware::ErrorHandlers::new()
+                .handler(::actix_web::http::StatusCode::NOT_FOUND, |req, res| error(404, req, res))
+                .handler(::actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, |req, res| error(500, req, res));
 
         ::actix_web::App::with_state(state)
+            .middleware(errors)
             .resource("/", |r| r.get().with(index))
             .resource("/search", |r| r.post().with(search))
             .resource("/show/{name}", |r| r.get().f(show))
@@ -43,7 +47,7 @@ fn index(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
 {
     let body = match state.template.render("index.html", &tera::Context::new()) {
         Ok(body) => body,
-        Err(err) => return error(err.into()),
+        Err(err) => return Error::from(err).into(),
     };
 
     ::actix_web::HttpResponse::Ok()
@@ -70,7 +74,7 @@ fn show(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpRespon
 {
     let body = match body(request, "show.html") {
         Ok(body) => body,
-        Err(err) => return error(err.into()),
+        Err(err) => return err.into(),
     };
 
     ::actix_web::HttpResponse::Ok()
@@ -82,7 +86,7 @@ fn feed(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpRespon
 {
     let body = match body(request, "feed.xml") {
         Ok(body) => body,
-        Err(err) => return error(err.into()),
+        Err(err) => return err.into(),
     };
 
     ::actix_web::HttpResponse::Ok()
@@ -111,7 +115,7 @@ fn about(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
 {
     let body = match state.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
-        Err(err) => return error(err.into()),
+        Err(err) => return Error::from(err).into(),
     };
 
     ::actix_web::HttpResponse::Ok()
@@ -119,18 +123,18 @@ fn about(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
         .body(body)
 }
 
-fn error(err: Error) -> ::actix_web::HttpResponse
+fn error(status: u32, request: &::actix_web::HttpRequest<AppState>, resp: ::actix_web::HttpResponse)
+    -> ::actix_web::Result<::actix_web::middleware::Response>
 {
-    use actix_web::http::StatusCode;
-
-    let status = match err {
-        Error::NotFound => StatusCode::NOT_FOUND,
-        Error::Template(err) => {
-            eprintln!("{:#?}", err);
-
-            StatusCode::INTERNAL_SERVER_ERROR
-        },
+    let template = format!("errors/{}.html", status);
+    let body = match request.state().template.render(&template, &tera::Context::new()) {
+        Ok(body) => body,
+        Err(_) => "Internal server error".to_string(),
     };
 
-    ::actix_web::HttpResponse::new(status)
+    let builder = resp.into_builder()
+        .header(::actix_web::http::header::CONTENT_TYPE, "text/html")
+        .body(body);
+
+    Ok(::actix_web::middleware::Response::Done(builder))
 }
