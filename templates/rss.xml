@@ -7,16 +7,18 @@
         {% endif %}
         <link><![CDATA[{{ group.url | safe }}]]></link>
         {% if group.image %}
-            <image><![CDATA[{{ group.image | safe }}]]></image>
+            <image>
+                <url><![CDATA[{{ group.image | safe }}]]></url>
+                <title>{{ group.name }}</title>
+                <link>{{ group.url | safe }}</link>
+            </image>
         {% endif %}
         {% for post in group.posts %}
             <item>
-                <title>{{ post.name | safe }}</title>
+                <title>{{ post.name | safe | striptags }}</title>
                 <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
-                <pubDate>{{ post.created_time }}</pubDate>
-                <guid>{{ post.id }}</guid>
-                <author>{{ group.name }}</author>
+                <guid><![CDATA[{{ post.permalink_url | safe }}]]></guid>
             </item>
         {% endfor %}
     </channel>
