@@ -18,6 +18,7 @@
                 <title>{{ post.name | safe | striptags }}</title>
                 <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
+                <pubDate>{{ post.created_time }}</pubDate>
                 <guid><![CDATA[{{ post.permalink_url | safe }}]]></guid>
             </item>
         {% endfor %}

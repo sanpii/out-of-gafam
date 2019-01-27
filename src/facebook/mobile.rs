@@ -50,10 +50,28 @@ impl Mobile
 
         let contents = client.get(&url)
             .header(::reqwest::header::USER_AGENT, "Mozilla")
+            .header(::reqwest::header::ACCEPT_LANGUAGE, "en-US")
             .send()?
             .text()?;
 
         Ok(contents)
+    }
+
+    fn parse_date(text: &str) -> String
+    {
+        let regex = ::regex::Regex::new("^(\\d+) hrs$")
+            .unwrap();
+
+        let relative_time = regex.replace(text, "-$1 hours");
+
+        match ::chrono_english::parse_date_string(
+            &relative_time,
+            ::chrono::Local::now(),
+            ::chrono_english::Dialect::Uk
+        ) {
+            Ok(date) => date.to_string(),
+            Err(_) => relative_time.to_string(),
+        }
     }
 }
 
@@ -102,7 +120,7 @@ impl super::Api for Mobile
             };
 
             let created_time = match element.select(&date_selector).nth(0) {
-                Some(e) => e.inner_html(),
+                Some(e) => Self::parse_date(&e.inner_html()),
                 None => continue,
             };
 
