@@ -20,6 +20,16 @@ struct Params {
 
 fn main()
 {
+    #[cfg(debug_assertions)]
+    ::dotenv::dotenv()
+        .ok();
+
+    let ip = ::std::env::var("LISTEN_IP")
+        .expect("Missing LISTEN_IP env variable");
+    let port = ::std::env::var("LISTEN_PORT")
+        .expect("Missing LISTEN_IP env variable");
+    let bind = format!("{}:{}", ip, port);
+
     ::actix_web::server::new(|| {
         let template = compile_templates!("templates/**/*");
         let state = AppState { template };
@@ -38,8 +48,8 @@ fn main()
             .resource("/about", |r| r.get().with(about))
             .handler("/static", static_files)
     })
-    .bind("127.0.0.1:8000")
-    .expect("Can not bind to port 8000")
+    .bind(&bind)
+    .expect(&format!("Can not bind to {}", bind))
     .run();
 }
 
