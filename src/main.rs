@@ -1,8 +1,3 @@
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate tera;
-
 mod facebook;
 mod error;
 
@@ -13,7 +8,7 @@ struct AppState {
     template: ::tera::Tera,
 }
 
-#[derive(Deserialize)]
+#[derive(serde_derive::Deserialize)]
 struct Params {
     account: String,
 }
@@ -31,7 +26,7 @@ fn main()
     let bind = format!("{}:{}", ip, port);
 
     ::actix_web::server::new(|| {
-        let template = compile_templates!("templates/**/*");
+        let template = tera::compile_templates!("templates/**/*");
         let state = AppState { template };
         let static_files = ::actix_web::fs::StaticFiles::new("static/")
             .expect("failed constructing static files handler");

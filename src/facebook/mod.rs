@@ -3,7 +3,7 @@ mod mobile;
 #[cfg(not(feature = "no-api"))]
 mod graph;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, serde_derive::Serialize)]
 pub struct Group {
     pub id: String,
     pub name: String,
@@ -13,7 +13,7 @@ pub struct Group {
     pub posts: Vec<Post>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, serde_derive::Serialize)]
 pub struct Post {
     pub id: String,
     pub name: String,
