@@ -5,7 +5,7 @@ use error::Error;
 use error::Result;
 
 struct AppState {
-    template: ::tera::Tera,
+    template: tera::Tera,
 }
 
 #[derive(serde_derive::Deserialize)]
@@ -16,25 +16,25 @@ struct Params {
 fn main()
 {
     #[cfg(debug_assertions)]
-    ::dotenv::dotenv()
+    dotenv::dotenv()
         .ok();
 
-    let ip = ::std::env::var("LISTEN_IP")
+    let ip = std::env::var("LISTEN_IP")
         .expect("Missing LISTEN_IP env variable");
-    let port = ::std::env::var("LISTEN_PORT")
+    let port = std::env::var("LISTEN_PORT")
         .expect("Missing LISTEN_IP env variable");
     let bind = format!("{}:{}", ip, port);
 
-    ::actix_web::server::new(|| {
+    actix_web::server::new(|| {
         let template = tera::compile_templates!("templates/**/*");
         let state = AppState { template };
-        let static_files = ::actix_web::fs::StaticFiles::new("static/")
+        let static_files = actix_web::fs::StaticFiles::new("static/")
             .expect("failed constructing static files handler");
-        let errors = ::actix_web::middleware::ErrorHandlers::new()
-                .handler(::actix_web::http::StatusCode::NOT_FOUND, |req, res| error(404, req, res))
-                .handler(::actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, |req, res| error(500, req, res));
+        let errors = actix_web::middleware::ErrorHandlers::new()
+                .handler(actix_web::http::StatusCode::NOT_FOUND, |req, res| error(404, req, res))
+                .handler(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, |req, res| error(500, req, res));
 
-        ::actix_web::App::with_state(state)
+        actix_web::App::with_state(state)
             .middleware(errors)
             .resource("/", |r| r.get().with(index))
             .resource("/search", |r| r.post().with(search))
@@ -48,21 +48,21 @@ fn main()
     .run();
 }
 
-fn index(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
+fn index(state: actix_web::State<AppState>) -> actix_web::HttpResponse
 {
     let body = match state.template.render("index.html", &tera::Context::new()) {
         Ok(body) => body,
         Err(err) => return Error::from(err).into(),
     };
 
-    ::actix_web::HttpResponse::Ok()
+    actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
 }
 
-fn search(params: ::actix_web::Form<Params>) -> ::actix_web::HttpResponse
+fn search(params: actix_web::Form<Params>) -> actix_web::HttpResponse
 {
-    let re = ::regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
+    let re = regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
         .unwrap();
 
     let name = match re.captures(&params.account) {
@@ -70,31 +70,31 @@ fn search(params: ::actix_web::Form<Params>) -> ::actix_web::HttpResponse
         None => params.account.clone(),
     };
 
-    ::actix_web::HttpResponse::Found()
-        .header(::actix_web::http::header::LOCATION, format!("/show/{}", name))
+    actix_web::HttpResponse::Found()
+        .header(actix_web::http::header::LOCATION, format!("/show/{}", name))
         .finish()
 }
 
-fn show(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpResponse
+fn show(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
 {
     let body = match body(request, "show.html") {
         Ok(body) => body,
         Err(err) => return err.into(),
     };
 
-    ::actix_web::HttpResponse::Ok()
+    actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
 }
 
-fn feed(request: &::actix_web::HttpRequest<AppState>) -> ::actix_web::HttpResponse
+fn feed(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
 {
     let body = match body(request, "rss.xml") {
         Ok(body) => body,
         Err(err) => return err.into(),
     };
 
-    ::actix_web::HttpResponse::Ok()
+    actix_web::HttpResponse::Ok()
         .content_type("application/rss+xml; charset=utf-8")
         .body(body)
 }
@@ -116,20 +116,20 @@ fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> Result<
     }
 }
 
-fn about(state: ::actix_web::State<AppState>) -> ::actix_web::HttpResponse
+fn about(state: actix_web::State<AppState>) -> actix_web::HttpResponse
 {
     let body = match state.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
         Err(err) => return Error::from(err).into(),
     };
 
-    ::actix_web::HttpResponse::Ok()
+    actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
 }
 
-fn error(status: u32, request: &::actix_web::HttpRequest<AppState>, resp: ::actix_web::HttpResponse)
-    -> ::actix_web::Result<::actix_web::middleware::Response>
+fn error(status: u32, request: &actix_web::HttpRequest<AppState>, resp: actix_web::HttpResponse)
+    -> actix_web::Result<actix_web::middleware::Response>
 {
     let template = format!("errors/{}.html", status);
     let body = match request.state().template.render(&template, &tera::Context::new()) {
@@ -138,8 +138,8 @@ fn error(status: u32, request: &::actix_web::HttpRequest<AppState>, resp: ::acti
     };
 
     let builder = resp.into_builder()
-        .header(::actix_web::http::header::CONTENT_TYPE, "text/html")
+        .header(actix_web::http::header::CONTENT_TYPE, "text/html")
         .body(body);
 
-    Ok(::actix_web::middleware::Response::Done(builder))
+    Ok(actix_web::middleware::Response::Done(builder))
 }

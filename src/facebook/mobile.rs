@@ -9,10 +9,10 @@ impl Mobile
         }
     }
 
-    fn og(html: &::scraper::html::Html, name: &str) -> crate::Result<String>
+    fn og(html: &scraper::html::Html, name: &str) -> crate::Result<String>
     {
         let s = format!("html > head > meta[property=\"og:{}\"]", name);
-        let selector = ::scraper::Selector::parse(&s)
+        let selector = scraper::Selector::parse(&s)
             .unwrap();
 
         let element = match html.select(&selector).nth(0) {
@@ -28,7 +28,7 @@ impl Mobile
 
     fn rewrite_href(&self, contents: &str) -> String
     {
-        let regex = ::regex::Regex::new(r#"href="(/[^"]+)""#)
+        let regex = regex::Regex::new(r#"href="(/[^"]+)""#)
             .unwrap();
 
         regex.replace_all(contents, r#"href="https://mobile.facebook.com$1""#)
@@ -46,11 +46,11 @@ impl Mobile
     fn get(&self, id: &str) -> crate::Result<String>
     {
         let url = format!("https://mobile.facebook.com/{}", id);
-        let client = ::reqwest::Client::new();
+        let client = reqwest::Client::new();
 
         let contents = client.get(&url)
-            .header(::reqwest::header::USER_AGENT, "Mozilla")
-            .header(::reqwest::header::ACCEPT_LANGUAGE, "en-US")
+            .header(reqwest::header::USER_AGENT, "Mozilla")
+            .header(reqwest::header::ACCEPT_LANGUAGE, "en-US")
             .send()?
             .text()?;
 
