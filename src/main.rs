@@ -102,10 +102,8 @@ fn feed(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
 fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> Result<String>
 {
     let name = &request.match_info()["name"];
-    let fb = crate::facebook::Facebook::new();
-
-    use crate::facebook::Api;
-    let group = fb.group(name)?;
+    let group = crate::facebook::Facebook::new()
+        .group(name)?;
 
     let mut context = tera::Context::new();
     context.insert("group", &group);
