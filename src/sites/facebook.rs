@@ -1,62 +1,58 @@
-#[derive(Debug, serde_derive::Serialize)]
-pub struct Group {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub url: String,
-    pub image: Option<String>,
-    pub posts: Vec<Post>,
-}
-
-#[derive(Debug, serde_derive::Serialize)]
-pub struct Post {
-    pub id: String,
-    pub name: String,
-    pub permalink_url: String,
-    pub message: String,
-    pub created_time: String,
-}
-
 pub struct Facebook {
 }
 
-impl Facebook
+impl Default for Facebook
 {
-    pub fn new() -> Self
+    fn default() -> Self
     {
         Self {
         }
     }
+}
 
-    pub fn group(&self, id: &str) -> crate::Result<self::Group>
+impl crate::sites::Site for Facebook
+{
+    fn id(&self, url: &str) -> Option<String>
     {
-        let contents = self.get(id)?;
-        let html = ::scraper::Html::parse_document(&contents);
+        let re = regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
+            .unwrap();
 
-        let mut group = Group {
+        match re.captures(url) {
+            Some(caps) => Some(caps["name"].to_string()),
+            None => None,
+        }
+    }
+
+    fn group(&self, id: &str) -> crate::Result<crate::sites::Group>
+    {
+        let url = format!("https://mobile.facebook.com/{}", id);
+        let contents = self.fetch(&url)?;
+        let html = scraper::Html::parse_document(&contents);
+
+        let mut group = crate::sites::Group {
             id: id.to_string(),
             name: Self::og(&html, "title")
                 .unwrap_or(id.to_string()),
             description: Self::og(&html, "description")
                 .ok(),
             url: Self::og(&html, "url")
-                .unwrap_or(format!("https://mobile.facebook.com/{}", id)),
+                .unwrap_or(url),
             image: Self::og(&html, "image")
                 .ok(),
             posts: vec![],
         };
 
-        let article_selector = ::scraper::Selector::parse("div[data-ft]")
+        let article_selector = scraper::Selector::parse("div[data-ft]")
             .unwrap();
-        let title_selector = ::scraper::Selector::parse("h3")
+        let title_selector = scraper::Selector::parse("h3")
             .unwrap();
-        let message_selector = ::scraper::Selector::parse("div > div > span")
+        let message_selector = scraper::Selector::parse("div > div > span")
             .unwrap();
-        let date_selector = ::scraper::Selector::parse("abbr")
+        let date_selector = scraper::Selector::parse("abbr")
             .unwrap();
-        let link_selector = ::scraper::Selector::parse("div:last-child > div:last-child > a:last-child")
+        let link_selector = scraper::Selector::parse("div:last-child > div:last-child > a:last-child")
             .unwrap();
-        let id_regex = ::regex::Regex::new("&id=([^&]+)")
+        let id_regex = regex::Regex::new("&id=([^&]+)")
             .unwrap();
 
         for element in html.select(&article_selector) {
@@ -85,7 +81,7 @@ impl Facebook
                 None => continue,
             };
 
-            let post = Post {
+            let post = crate::sites::Post {
                 name,
                 permalink_url,
                 message,
@@ -98,7 +94,10 @@ impl Facebook
 
         Ok(group)
     }
+}
 
+impl Facebook
+{
     fn og(html: &scraper::html::Html, name: &str) -> crate::Result<String>
     {
         let s = format!("html > head > meta[property=\"og:{}\"]", name);
@@ -130,31 +129,17 @@ impl Facebook
         contents.replace("/", "https://mobile.facebook.com/")
     }
 
-    fn get(&self, id: &str) -> crate::Result<String>
-    {
-        let url = format!("https://mobile.facebook.com/{}", id);
-        let client = reqwest::Client::new();
-
-        let contents = client.get(&url)
-            .header(reqwest::header::USER_AGENT, "Mozilla")
-            .header(reqwest::header::ACCEPT_LANGUAGE, "en-US")
-            .send()?
-            .text()?;
-
-        Ok(contents)
-    }
-
     fn parse_date(text: &str) -> String
     {
-        let regex = ::regex::Regex::new("^(\\d+) hrs$")
+        let regex = regex::Regex::new("^(\\d+) hrs$")
             .unwrap();
 
         let relative_time = regex.replace(text, "-$1 hours");
 
-        match ::chrono_english::parse_date_string(
+        match chrono_english::parse_date_string(
             &relative_time,
-            ::chrono::Local::now(),
-            ::chrono_english::Dialect::Uk
+            chrono::Local::now(),
+            chrono_english::Dialect::Uk
         ) {
             Ok(date) => date.to_string(),
             Err(_) => relative_time.to_string(),

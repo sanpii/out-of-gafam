@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ group.id }}" />
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ site }}/{{ group.id }}" />
 <link href="/static/lib/Font-Awesome/css/all.min.css" rel="stylesheet" />
 {% endblock %}
 
@@ -17,7 +17,7 @@
     <ul class="posts">
         {% for post in group.posts %}
             <li class="post">
-                {{ post.name | safe }}
+                <a href="{{ post.permalink_url | safe }}">{{ post.name | safe }}</a>
                 <div>
                     {{ post.message | safe }}
                 </div>

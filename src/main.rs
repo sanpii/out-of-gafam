@@ -1,10 +1,12 @@
-mod facebook;
 mod error;
+mod sites;
 
 use error::Error;
 use error::Result;
+use sites::Sites;
 
 struct AppState {
+    sites: Sites,
     template: tera::Tera,
 }
 
@@ -26,8 +28,10 @@ fn main()
     let bind = format!("{}:{}", ip, port);
 
     actix_web::server::new(|| {
-        let template = tera::compile_templates!("templates/**/*");
-        let state = AppState { template };
+        let state = AppState {
+            template: tera::compile_templates!("templates/**/*"),
+            sites: Sites::new(),
+        };
         let static_files = actix_web::fs::StaticFiles::new("static/")
             .expect("failed constructing static files handler");
         let errors = actix_web::middleware::ErrorHandlers::new()
@@ -38,8 +42,10 @@ fn main()
             .middleware(errors)
             .resource("/", |r| r.get().with(index))
             .resource("/search", |r| r.post().with(search))
-            .resource("/show/{name:.*}", |r| r.get().f(show))
-            .resource("/feed/{name:.*}", |r| r.get().f(feed))
+            .resource("/show/{site}/{name:.*}", |r| r.get().f(show))
+            .resource("/feed/{site}/{name:.*}", |r| r.get().f(feed))
+            .resource("/show/{name:.*}", |r| r.get().f(show_fb))
+            .resource("/feed/{name:.*}", |r| r.get().f(feed_fb))
             .resource("/about", |r| r.get().with(about))
             .handler("/static", static_files)
     })
@@ -60,18 +66,25 @@ fn index(state: actix_web::State<AppState>) -> actix_web::HttpResponse
         .body(body)
 }
 
-fn search(params: actix_web::Form<Params>) -> actix_web::HttpResponse
+fn search(state: actix_web::State<AppState>, params: actix_web::Form<Params>) -> actix_web::HttpResponse
 {
-    let re = regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
-        .unwrap();
+    if let Some((name, id)) = state.sites.find(&params.account) {
+        actix_web::HttpResponse::Found()
+            .header(actix_web::http::header::LOCATION, format!("/show/{}/{}", name, id))
+            .finish()
+    }
+    else {
+        actix_web::HttpResponse::NotFound()
+            .finish()
+    }
+}
 
-    let name = match re.captures(&params.account) {
-        Some(caps) => caps["name"].to_string(),
-        None => params.account.clone(),
-    };
+fn show_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+{
+    let name = &request.match_info()["name"];
 
-    actix_web::HttpResponse::Found()
-        .header(actix_web::http::header::LOCATION, format!("/show/{}", name))
+    actix_web::HttpResponse::MovedPermanently()
+        .header(actix_web::http::header::LOCATION, format!("/show/facebook/{}", name))
         .finish()
 }
 
@@ -85,6 +98,15 @@ fn show(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
     actix_web::HttpResponse::Ok()
         .content_type("text/html")
         .body(body)
+}
+
+fn feed_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+{
+    let name = &request.match_info()["name"];
+
+    actix_web::HttpResponse::MovedPermanently()
+        .header(actix_web::http::header::LOCATION, format!("/feed/facebook/{}", name))
+        .finish()
 }
 
 fn feed(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
@@ -101,11 +123,14 @@ fn feed(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
 
 fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> Result<String>
 {
+    let site = &request.match_info()["site"];
     let name = &request.match_info()["name"];
-    let group = crate::facebook::Facebook::new()
-        .group(name)?;
+    let sites = &request.state().sites;
+
+    let group = sites.group(site, name)?;
 
     let mut context = tera::Context::new();
+    context.insert("site", site);
     context.insert("group", &group);
 
     match request.state().template.render(template, &context) {
