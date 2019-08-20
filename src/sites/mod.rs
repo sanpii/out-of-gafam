@@ -1,6 +1,8 @@
 mod facebook;
+mod instagram;
 
 use facebook::Facebook;
+use instagram::Instagram;
 
 use std::collections::HashMap;
 
@@ -51,6 +53,7 @@ impl Sites
     {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::new(Facebook::default()));
+        sites.insert("instagram", Box::new(Instagram::default()));
 
         Self {
             sites,
