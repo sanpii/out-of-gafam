@@ -32,7 +32,7 @@ impl crate::sites::Site for Facebook
         let mut group = crate::sites::Group {
             id: id.to_string(),
             name: Self::og(&html, "title")
-                .unwrap_or(id.to_string()),
+                .unwrap_or_else(|_| id.to_string()),
             description: Self::og(&html, "description")
                 .ok(),
             url: Self::og(&html, "url")

@@ -46,7 +46,7 @@ fn main()
             .service(static_files)
     })
     .bind(&bind)
-    .expect(&format!("Can not bind to {}", bind))
+    .unwrap_or_else(|_| panic!("Can not bind to {}", bind))
     .run()
     .unwrap();
 }
