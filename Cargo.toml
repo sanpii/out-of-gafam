@@ -5,7 +5,8 @@ authors = ["Sanpi <sanpi@homecomputing.fr>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "0.7"
+actix-web = "1.0"
+actix-files = "0.1"
 chrono = "0.4"
 chrono-english = "0.1"
 dotenv = "0.14"

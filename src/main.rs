@@ -5,7 +5,7 @@ use error::Error;
 use error::Result;
 use sites::Sites;
 
-struct AppState {
+struct AppData {
     sites: Sites,
     template: tera::Tera,
 }
@@ -27,48 +27,47 @@ fn main()
         .expect("Missing LISTEN_IP env variable");
     let bind = format!("{}:{}", ip, port);
 
-    actix_web::server::new(|| {
-        let state = AppState {
+    actix_web::HttpServer::new(|| {
+        let data = AppData {
             template: tera::compile_templates!("templates/**/*"),
             sites: Sites::new(),
         };
-        let static_files = actix_web::fs::StaticFiles::new("static/")
-            .expect("failed constructing static files handler");
-        let errors = actix_web::middleware::ErrorHandlers::new()
-                .handler(actix_web::http::StatusCode::NOT_FOUND, |req, res| error(404, req, res))
-                .handler(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, |req, res| error(500, req, res));
+        let static_files = actix_files::Files::new("/static", "static/");
 
-        actix_web::App::with_state(state)
-            .middleware(errors)
-            .resource("/", |r| r.get().with(index))
-            .resource("/search", |r| r.post().with(search))
-            .resource("/show/{site}/{name:.*}", |r| r.get().f(show))
-            .resource("/feed/{site}/{name:.*}", |r| r.get().f(feed))
-            .resource("/show/{name:.*}", |r| r.get().f(show_fb))
-            .resource("/feed/{name:.*}", |r| r.get().f(feed_fb))
-            .resource("/about", |r| r.get().with(about))
-            .handler("/static", static_files)
+        actix_web::App::new()
+            .data(data)
+            .route("/", actix_web::web::get().to(index))
+            .route("/search", actix_web::web::post().to(search))
+            .route("/show/{site}/{name:.*}", actix_web::web::get().to(show))
+            .route("/feed/{site}/{name:.*}", actix_web::web::get().to(feed))
+            .route("/show/{name:.*}", actix_web::web::get().to(show_fb))
+            .route("/feed/{name:.*}", actix_web::web::get().to(feed_fb))
+            .route("/about", actix_web::web::get().to(about))
+            .service(static_files)
     })
     .bind(&bind)
     .expect(&format!("Can not bind to {}", bind))
-    .run();
+    .run()
+    .unwrap();
 }
 
-fn index(state: actix_web::State<AppState>) -> actix_web::HttpResponse
+fn index(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
 {
-    let body = match state.template.render("index.html", &tera::Context::new()) {
+    let body = match data.template.render("index.html", &tera::Context::new()) {
         Ok(body) => body,
-        Err(err) => return Error::from(err).into(),
+        Err(err) => return Err(Error::from(err)),
     };
 
-    actix_web::HttpResponse::Ok()
+    let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
-        .body(body)
+        .body(body);
+
+    Ok(response)
 }
 
-fn search(state: actix_web::State<AppState>, params: actix_web::Form<Params>) -> actix_web::HttpResponse
+fn search(data: actix_web::web::Data<AppData>, params: actix_web::web::Form<Params>) -> actix_web::HttpResponse
 {
-    if let Some((name, id)) = state.sites.find(&params.account) {
+    if let Some((name, id)) = data.sites.find(&params.account) {
         actix_web::HttpResponse::Found()
             .header(actix_web::http::header::LOCATION, format!("/show/{}/{}", name, id))
             .finish()
@@ -79,7 +78,7 @@ fn search(state: actix_web::State<AppState>, params: actix_web::Form<Params>) ->
     }
 }
 
-fn show_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+fn show_fb(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 {
     let name = &request.match_info()["name"];
 
@@ -88,19 +87,18 @@ fn show_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpRespons
         .finish()
 }
 
-fn show(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+fn show(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
-    let body = match body(request, "show.html") {
-        Ok(body) => body,
-        Err(err) => return err.into(),
-    };
+    let body = body(&request, "show.html")?;
 
-    actix_web::HttpResponse::Ok()
+    let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
-        .body(body)
+        .body(body);
+
+    Ok(response)
 }
 
-fn feed_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+fn feed_fb(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 {
     let name = &request.match_info()["name"];
 
@@ -109,60 +107,46 @@ fn feed_fb(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpRespons
         .finish()
 }
 
-fn feed(request: &actix_web::HttpRequest<AppState>) -> actix_web::HttpResponse
+fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
-    let body = match body(request, "rss.xml") {
-        Ok(body) => body,
-        Err(err) => return err.into(),
-    };
+    let body = body(&request, "rss.xml")?;
 
-    actix_web::HttpResponse::Ok()
+    let response = actix_web::HttpResponse::Ok()
         .content_type("application/rss+xml; charset=utf-8")
-        .body(body)
+        .body(body);
+
+    Ok(response)
 }
 
-fn body(request: &::actix_web::HttpRequest<AppState>, template: &str) -> Result<String>
+fn body(request: &::actix_web::HttpRequest, template: &str) -> Result<String>
 {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["name"];
-    let sites = &request.state().sites;
+    let data: &AppData = request.app_data()
+        .unwrap();
 
-    let group = sites.group(site, name)?;
+    let group = data.sites.group(site, name)?;
 
     let mut context = tera::Context::new();
     context.insert("site", site);
     context.insert("group", &group);
 
-    match request.state().template.render(template, &context) {
+    match data.template.render(template, &context) {
         Ok(body) => Ok(body),
         Err(err) => Err(err.into()),
     }
 }
 
-fn about(state: actix_web::State<AppState>) -> actix_web::HttpResponse
+fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
 {
-    let body = match state.template.render("about.html", &tera::Context::new()) {
+    let body = match data.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
-        Err(err) => return Error::from(err).into(),
+        Err(err) => return Err(Error::from(err)),
     };
 
-    actix_web::HttpResponse::Ok()
+    let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
-        .body(body)
-}
-
-fn error(status: u32, request: &actix_web::HttpRequest<AppState>, resp: actix_web::HttpResponse)
-    -> actix_web::Result<actix_web::middleware::Response>
-{
-    let template = format!("errors/{}.html", status);
-    let body = match request.state().template.render(&template, &tera::Context::new()) {
-        Ok(body) => body,
-        Err(_) => "Internal server error".to_string(),
-    };
-
-    let builder = resp.into_builder()
-        .header(actix_web::http::header::CONTENT_TYPE, "text/html")
         .body(body);
 
-    Ok(actix_web::middleware::Response::Done(builder))
+    Ok(response)
 }
