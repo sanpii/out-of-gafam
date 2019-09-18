@@ -58,7 +58,7 @@ impl crate::sites::Site for Instagram
 
             let post = crate::sites::Post {
                 name: "Post".to_string(),
-                permalink_url: format!("https://www.instagram.com/p/{}/", edge["node"]["shortcode"]),
+                permalink_url: format!("/post/instagram/{}", edge["node"]["shortcode"]),
                 message,
                 created_time: Self::parse_date(&edge["node"]["taken_at_timestamp"].to_string()),
                 id: edge["id"].to_string(),
@@ -68,6 +68,32 @@ impl crate::sites::Site for Instagram
         }
 
         Ok(group)
+    }
+
+    fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
+    {
+        let url = format!("https://www.instagram.com/p/{}/?__a=1", id);
+        let contents = self.fetch(&url)?;
+        let json = json::parse(&contents)
+            .unwrap();
+
+        let caption = match &json["graphql"]["shortcode_media"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
+            json::JsonValue::String(caption) => caption.replace("\n", "<br />"),
+            _ => String::new(),
+        };
+        let thumbnail = &json["graphql"]["shortcode_media"]["display_resources"][0]["src"];
+
+        let message = format!("{}<br /><img src=\"{}\" />", caption, thumbnail);
+
+        let post = crate::sites::Post {
+            name: "Post".to_string(),
+            id: json["graphql"]["shortcode_media"]["id"].to_string(),
+            permalink_url: format!("/post/instagram/{}", json["graphql"]["shortcode_media"]["shortcode"]),
+            message,
+            created_time: Self::parse_date(&json["graphql"]["shortcode_media"]["taken_at_timestamp"].to_string()),
+        };
+
+        Ok(post)
     }
 }
 

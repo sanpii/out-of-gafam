@@ -2,10 +2,9 @@
 
 {% block head %}
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ site }}/{{ group.id }}" />
-<link href="/static/lib/Font-Awesome/css/all.min.css" rel="stylesheet" />
 {% endblock %}
 
-{% block title %}<a href="{{ group.url | safe }}">{{ group.name }}</a>{% endblock %}
+{% block title %}<a href="{{ group.url | safe }}" title="Back to {{ site }}"><i class="fab fa-{{ site }}"></i> {{ group.name }}</a>{% endblock %}
 
 {% block logo %}
     {% if group.image %}

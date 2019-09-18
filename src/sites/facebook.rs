@@ -94,6 +94,55 @@ impl crate::sites::Site for Facebook
 
         Ok(group)
     }
+
+    fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
+    {
+        let mut t = id.split('-');
+        let story_fbid = match t.nth(0) {
+            Some(story_fbid) => story_fbid,
+            None => return Err(crate::Error::NotFound),
+        };
+        let id = match t.nth(0) {
+            Some(id) => id,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        let permalink_url = format!("https://mobile.facebook.com/story.php?story_fbid={}&id={}", story_fbid, id);
+        let contents = self.fetch(&permalink_url)?;
+        let html = scraper::Html::parse_document(&contents);
+
+        let story_selector = scraper::Selector::parse("#m_story_permalink_view")
+            .unwrap();
+        let title_selector = scraper::Selector::parse("#m_story_permalink_view h3 > span > strong > a")
+            .unwrap();
+        let date_selector = scraper::Selector::parse("abbr")
+            .unwrap();
+
+        let story = match html.select(&story_selector).nth(0) {
+            Some(story) => story,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        let title = match html.select(&title_selector).nth(0) {
+            Some(title) => title,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        let created_time = match story.select(&date_selector).nth(0) {
+            Some(e) => Self::parse_date(&e.inner_html()),
+            None => Default::default(),
+        };
+
+        let post = crate::sites::Post {
+            name: title.inner_html(),
+            id: id.to_string(),
+            permalink_url,
+            message: story.inner_html(),
+            created_time,
+        };
+
+        Ok(post)
+    }
 }
 
 impl Facebook
@@ -120,7 +169,13 @@ impl Facebook
         let regex = regex::Regex::new(r#"href="(/[^"]+)""#)
             .unwrap();
 
-        regex.replace_all(contents, r#"href="https://mobile.facebook.com$1""#)
+        let contents = regex.replace_all(&contents, r#"href="https://mobile.facebook.com$1""#)
+            .to_string();
+
+        let regex = regex::Regex::new(r#"href="https://mobile\.facebook\.com/story\.php\?story_fbid=([^&]+)&amp;id=([^&]+)[^"]*"#)
+            .unwrap();
+
+        regex.replace_all(&contents, r#"href="/post/facebook/$1-$2"#)
             .to_string()
     }
 

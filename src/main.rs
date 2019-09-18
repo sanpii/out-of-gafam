@@ -39,6 +39,7 @@ fn main()
             .route("/", actix_web::web::get().to(index))
             .route("/search", actix_web::web::post().to(search))
             .route("/show/{site}/{name:.*}", actix_web::web::get().to(show))
+            .route("/post/{site}/{id:.*}", actix_web::web::get().to(post))
             .route("/feed/{site}/{name:.*}", actix_web::web::get().to(feed))
             .route("/show/{name:.*}", actix_web::web::get().to(show_fb))
             .route("/feed/{name:.*}", actix_web::web::get().to(feed_fb))
@@ -142,6 +143,31 @@ fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
     let body = match data.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
         Err(err) => return Err(Error::from(err)),
+    };
+
+    let response = actix_web::HttpResponse::Ok()
+        .content_type("text/html")
+        .body(body);
+
+    Ok(response)
+}
+
+fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+{
+    let site = &request.match_info()["site"];
+    let name = &request.match_info()["id"];
+    let data: &AppData = request.app_data()
+        .unwrap();
+
+    let post = data.sites.post(site, name)?;
+
+    let mut context = tera::Context::new();
+    context.insert("site", site);
+    context.insert("post", &post);
+
+    let body = match data.template.render("post.html", &context) {
+        Ok(body) => body,
+        Err(err) => return Err(err.into()),
     };
 
     let response = actix_web::HttpResponse::Ok()

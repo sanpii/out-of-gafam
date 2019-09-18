@@ -28,6 +28,7 @@ pub struct Post {
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
     fn group(&self, id: &str) -> crate::Result<self::Group>;
+    fn post(&self, id: &str) -> crate::Result<self::Post>;
 
     fn fetch(&self, url: &str) -> crate::Result<String>
     {
@@ -80,5 +81,15 @@ impl Sites
         };
 
         site.group(id)
+    }
+
+    pub fn post(&self, name: &str, id: &str) -> crate::Result<Post>
+    {
+        let site = match self.sites.get(name) {
+            Some(site) => site,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        site.post(id)
     }
 }
