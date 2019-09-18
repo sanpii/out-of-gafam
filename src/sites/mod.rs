@@ -34,13 +34,17 @@ pub trait Site {
     {
         let client = reqwest::Client::new();
 
-        let contents = client.get(url)
+        let mut response = client.get(url)
             .header(reqwest::header::USER_AGENT, "Mozilla")
             .header(reqwest::header::ACCEPT_LANGUAGE, "en-US")
-            .send()?
-            .text()?;
+            .send()?;
 
-        Ok(contents)
+        if response.status().is_success() {
+            Ok(response.text()?)
+        }
+        else {
+            Err(crate::Error::NotFound)
+        }
     }
 }
 
