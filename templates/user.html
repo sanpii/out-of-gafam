@@ -1,20 +1,24 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ site }}/{{ group.id }}" />
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/{{ site }}/{{ user.id }}" />
 {% endblock %}
 
-{% block title %}<a href="{{ group.url | safe }}" title="Back to {{ site }}"><i class="fab fa-{{ site }}"></i> {{ group.name }}</a>{% endblock %}
+{% block title %}
+    <a href="{{ user.url | safe }}" title="Back to {{ site }}">
+        <i class="fab fa-{{ site }}"></i> {{ user.name }}
+    </a>
+{% endblock %}
 
 {% block logo %}
-    {% if group.image %}
-        <img class="mb-4" src="{{ group.image | safe }}" />
+    {% if user.image %}
+        <img class="mb-4" src="{{ user.image | safe }}" />
     {% endif %}
 {% endblock %}
 
 {% block content %}
     <ul class="posts">
-        {% for post in group.posts %}
+        {% for post in user.posts %}
             <li class="post">
                 <a href="{{ post.permalink_url | safe }}">{{ post.name | safe }}</a>
                 <div>

@@ -7,7 +7,7 @@ use instagram::Instagram;
 use std::collections::HashMap;
 
 #[derive(Debug, serde_derive::Serialize)]
-pub struct Group {
+pub struct User {
     pub id: String,
     pub name: String,
     pub description: Option<String>,
@@ -27,7 +27,7 @@ pub struct Post {
 
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
-    fn group(&self, id: &str) -> crate::Result<self::Group>;
+    fn user(&self, id: &str) -> crate::Result<self::User>;
     fn post(&self, id: &str) -> crate::Result<self::Post>;
 
     fn fetch(&self, url: &str) -> crate::Result<String>
@@ -73,14 +73,14 @@ impl Sites
         None
     }
 
-    pub fn group(&self, name: &str, id: &str) -> crate::Result<Group>
+    pub fn user(&self, name: &str, id: &str) -> crate::Result<User>
     {
         let site = match self.sites.get(name) {
             Some(site) => site,
             None => return Err(crate::Error::NotFound),
         };
 
-        site.group(id)
+        site.user(id)
     }
 
     pub fn post(&self, name: &str, id: &str) -> crate::Result<Post>

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>{{ group.name }}</title>
-        {% if group.description %}
-            <description><![CDATA[{{ group.description | safe }}]]></description>
+        <title>{{ user.name }}</title>
+        {% if user.description %}
+            <description><![CDATA[{{ user.description | safe }}]]></description>
         {% endif %}
-        <link><![CDATA[{{ group.url | safe }}]]></link>
-        {% if group.image %}
+        <link><![CDATA[{{ user.url | safe }}]]></link>
+        {% if user.image %}
             <image>
-                <url><![CDATA[{{ group.image | safe }}]]></url>
-                <title>{{ group.name }}</title>
-                <link>{{ group.url | safe }}</link>
+                <url><![CDATA[{{ user.image | safe }}]]></url>
+                <title>{{ user.name }}</title>
+                <link>{{ user.url | safe }}</link>
             </image>
         {% endif %}
-        {% for post in group.posts %}
+        {% for post in user.posts %}
             <item>
                 <title>{{ post.name | safe | striptags }}</title>
                 <link><![CDATA[{{ post.permalink_url | safe }}]]></link>

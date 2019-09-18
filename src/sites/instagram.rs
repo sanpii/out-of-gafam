@@ -31,14 +31,14 @@ impl crate::sites::Site for Instagram
         }
     }
 
-    fn group(&self, id: &str) -> crate::Result<crate::sites::Group>
+    fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://www.instagram.com/{}/?__a=1", id);
         let contents = self.fetch(&url)?;
         let json = json::parse(&contents)
             .unwrap();
 
-        let mut group = crate::sites::Group {
+        let mut user = crate::sites::User {
             id: id.to_string(),
             name: json["graphql"]["user"]["username"].to_string(),
             description: Some(json["graphql"]["user"]["biography"].to_string()),
@@ -64,10 +64,10 @@ impl crate::sites::Site for Instagram
                 id: edge["id"].to_string(),
             };
 
-            group.posts.push(post);
+            user.posts.push(post);
         }
 
-        Ok(group)
+        Ok(user)
     }
 
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>

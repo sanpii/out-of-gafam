@@ -39,6 +39,7 @@ fn main()
             .route("/", actix_web::web::get().to(index))
             .route("/search", actix_web::web::post().to(search))
             .route("/show/{site}/{name:.*}", actix_web::web::get().to(show))
+            .route("/user/{site}/{name:.*}", actix_web::web::get().to(user))
             .route("/post/{site}/{id:.*}", actix_web::web::get().to(post))
             .route("/feed/{site}/{name:.*}", actix_web::web::get().to(feed))
             .route("/show/{name:.*}", actix_web::web::get().to(show_fb))
@@ -88,9 +89,19 @@ fn show_fb(request: actix_web::HttpRequest) -> actix_web::HttpResponse
         .finish()
 }
 
-fn show(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+fn show(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 {
-    let body = body(&request, "show.html")?;
+    let site = &request.match_info()["site"];
+    let name = &request.match_info()["name"];
+
+    actix_web::HttpResponse::MovedPermanently()
+        .header(actix_web::http::header::LOCATION, format!("/user/{}/{}", site, name))
+        .finish()
+}
+
+fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+{
+    let body = body(&request, "user.html")?;
 
     let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
@@ -126,11 +137,11 @@ fn body(request: &::actix_web::HttpRequest, template: &str) -> Result<String>
     let data: &AppData = request.app_data()
         .unwrap();
 
-    let group = data.sites.group(site, name)?;
+    let user = data.sites.user(site, name)?;
 
     let mut context = tera::Context::new();
     context.insert("site", site);
-    context.insert("group", &group);
+    context.insert("user", &user);
 
     match data.template.render(template, &context) {
         Ok(body) => Ok(body),

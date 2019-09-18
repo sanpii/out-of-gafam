@@ -23,13 +23,13 @@ impl crate::sites::Site for Facebook
         }
     }
 
-    fn group(&self, id: &str) -> crate::Result<crate::sites::Group>
+    fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://mobile.facebook.com/{}", id);
         let contents = self.fetch(&url)?;
         let html = scraper::Html::parse_document(&contents);
 
-        let mut group = crate::sites::Group {
+        let mut user = crate::sites::User {
             id: id.to_string(),
             name: Self::og(&html, "title")
                 .unwrap_or_else(|_| id.to_string()),
@@ -89,10 +89,10 @@ impl crate::sites::Site for Facebook
                 id,
             };
 
-            group.posts.push(post);
+            user.posts.push(post);
         }
 
-        Ok(group)
+        Ok(user)
     }
 
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
