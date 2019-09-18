@@ -1,8 +1,10 @@
 mod facebook;
 mod instagram;
+mod youtube;
 
 use facebook::Facebook;
 use instagram::Instagram;
+use youtube::Youtube;
 
 use std::collections::HashMap;
 
@@ -46,6 +48,23 @@ pub trait Site {
             Err(crate::Error::NotFound)
         }
     }
+
+    fn og(&self, html: &scraper::html::Html, name: &str) -> crate::Result<String>
+    {
+        let s = format!("html > head > meta[property=\"og:{}\"]", name);
+        let selector = scraper::Selector::parse(&s)
+            .unwrap();
+
+        let element = match html.select(&selector).nth(0) {
+            Some(element) => element,
+            None => return Err(crate::Error::NotFound),
+        };
+
+        match element.value().attr("content") {
+            Some(content) => Ok(content.to_string()),
+            None => Err(crate::Error::NotFound),
+        }
+    }
 }
 
 pub struct Sites {
@@ -59,6 +78,7 @@ impl Sites
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::new(Facebook::default()));
         sites.insert("instagram", Box::new(Instagram::default()));
+        sites.insert("youtube", Box::new(Youtube::default()));
 
         Self {
             sites,

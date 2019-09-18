@@ -31,13 +31,13 @@ impl crate::sites::Site for Facebook
 
         let mut user = crate::sites::User {
             id: id.to_string(),
-            name: Self::og(&html, "title")
+            name: self.og(&html, "title")
                 .unwrap_or_else(|_| id.to_string()),
-            description: Self::og(&html, "description")
+            description: self.og(&html, "description")
                 .ok(),
-            url: Self::og(&html, "url")
+            url: self.og(&html, "url")
                 .unwrap_or(url),
-            image: Self::og(&html, "image")
+            image: self.og(&html, "image")
                 .ok(),
             posts: vec![],
         };
@@ -147,23 +147,6 @@ impl crate::sites::Site for Facebook
 
 impl Facebook
 {
-    fn og(html: &scraper::html::Html, name: &str) -> crate::Result<String>
-    {
-        let s = format!("html > head > meta[property=\"og:{}\"]", name);
-        let selector = scraper::Selector::parse(&s)
-            .unwrap();
-
-        let element = match html.select(&selector).nth(0) {
-            Some(element) => element,
-            None => return Err(crate::Error::NotFound),
-        };
-
-        match element.value().attr("content") {
-            Some(content) => Ok(content.to_string()),
-            None => Err(crate::Error::NotFound),
-        }
-    }
-
     fn rewrite_href(&self, contents: &str) -> String
     {
         let regex = regex::Regex::new(r#"href="(/[^"]+)""#)
