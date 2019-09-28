@@ -1,6 +1,8 @@
 #[derive(Debug)]
 pub enum Error {
+    Json(json::JsonError),
     NotFound,
+    Request(reqwest::Error),
     Template(tera::Error),
 }
 
@@ -9,7 +11,9 @@ impl std::fmt::Display for Error
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
         let s = match self {
+            Error::Json(_) => "Invalid json response",
             Error::NotFound => "Not found",
+            Error::Request(_) => "Unable to fetch remote resource",
             Error::Template(_) => "Template error",
         };
 
@@ -24,7 +28,9 @@ impl Into<actix_web::http::StatusCode> for &Error
         use actix_web::http::StatusCode;
 
         match self {
+            Error::Json(_) => StatusCode::NOT_FOUND,
             Error::NotFound => StatusCode::NOT_FOUND,
+            Error::Request(_) => StatusCode::NOT_FOUND,
             Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -40,9 +46,17 @@ impl From<tera::Error> for Error
 
 impl From<reqwest::Error> for Error
 {
-    fn from(_: reqwest::Error) -> Self
+    fn from(err: reqwest::Error) -> Self
     {
-        Error::NotFound
+        Error::Request(err)
+    }
+}
+
+impl From<json::JsonError> for Error
+{
+    fn from(err: json::JsonError) -> Self
+    {
+        Error::Json(err)
     }
 }
 

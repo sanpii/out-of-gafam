@@ -34,9 +34,7 @@ impl crate::sites::Site for Instagram
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://www.instagram.com/{}/?__a=1", id);
-        let contents = self.fetch(&url)?;
-        let json = json::parse(&contents)
-            .unwrap();
+        let json = self.fetch_json(&url)?;
 
         let mut user = crate::sites::User {
             id: id.to_string(),
@@ -73,9 +71,7 @@ impl crate::sites::Site for Instagram
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
     {
         let url = format!("https://www.instagram.com/p/{}/?__a=1", id);
-        let contents = self.fetch(&url)?;
-        let json = json::parse(&contents)
-            .unwrap();
+        let json = self.fetch_json(&url)?;
 
         let caption = match &json["graphql"]["shortcode_media"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
             json::JsonValue::String(caption) => caption.replace("\n", "<br />"),

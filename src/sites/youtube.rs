@@ -31,12 +31,10 @@ impl crate::sites::Site for Youtube
         };
 
         if &king == "user" {
-            let contents = match self.fetch(&url) {
+            let html = match self.fetch_html(&url) {
                 Ok(contents) => contents,
                 Err(_) => return None,
             };
-
-            let html = scraper::Html::parse_document(&contents);
 
             let og_url = match self.og(&html, "url") {
                 Ok(og_url) => og_url,
@@ -55,9 +53,7 @@ impl crate::sites::Site for Youtube
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id);
-
-        let contents = self.fetch(&url)?;
-        let html = scraper::Html::parse_document(&contents);
+        let html = self.fetch_html(&url)?;
 
         let title_selector = scraper::Selector::parse("feed > title")
             .unwrap();
@@ -126,10 +122,7 @@ impl crate::sites::Site for Youtube
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
     {
         let url = format!("http://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={}&format=json", id);
-
-        let contents = self.fetch(&url)?;
-        let json = json::parse(&contents)
-            .unwrap();
+        let json = self.fetch_json(&url)?;
 
         let message = format!(r#"<iframe
     width="560"

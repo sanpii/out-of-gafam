@@ -32,6 +32,22 @@ pub trait Site {
     fn user(&self, id: &str) -> crate::Result<self::User>;
     fn post(&self, id: &str) -> crate::Result<self::Post>;
 
+    fn fetch_json(&self, url: &str) -> crate::Result<json::JsonValue>
+    {
+        let contents = self.fetch(&url)?;
+        let json = json::parse(&contents)?;
+
+        Ok(json)
+    }
+
+    fn fetch_html(&self, url: &str) -> crate::Result<scraper::html::Html>
+    {
+        let contents = self.fetch(&url)?;
+        let html = scraper::Html::parse_document(&contents);
+
+        Ok(html)
+    }
+
     fn fetch(&self, url: &str) -> crate::Result<String>
     {
         let client = reqwest::Client::new();

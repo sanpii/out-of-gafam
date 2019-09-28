@@ -26,8 +26,7 @@ impl crate::sites::Site for Facebook
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://mobile.facebook.com/{}", id);
-        let contents = self.fetch(&url)?;
-        let html = scraper::Html::parse_document(&contents);
+        let html = self.fetch_html(&url)?;
 
         let mut user = crate::sites::User {
             id: id.to_string(),
@@ -108,8 +107,7 @@ impl crate::sites::Site for Facebook
         };
 
         let permalink_url = format!("https://mobile.facebook.com/story.php?story_fbid={}&id={}", story_fbid, id);
-        let contents = self.fetch(&permalink_url)?;
-        let html = scraper::Html::parse_document(&contents);
+        let html = self.fetch_html(&permalink_url)?;
 
         let story_selector = scraper::Selector::parse("#m_story_permalink_view")
             .unwrap();
