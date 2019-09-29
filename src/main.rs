@@ -1,13 +1,15 @@
 mod error;
 mod sites;
+mod template;
 
 use error::Error;
 use error::Result;
 use sites::Sites;
+use template::Template;
 
 struct AppData {
     sites: Sites,
-    template: tera::Tera,
+    template: Template,
 }
 
 #[derive(serde_derive::Deserialize)]
@@ -17,6 +19,8 @@ struct Params {
 
 fn main()
 {
+    env_logger::init();
+
     #[cfg(debug_assertions)]
     dotenv::dotenv()
         .ok();
@@ -27,9 +31,12 @@ fn main()
         .expect("Missing LISTEN_IP env variable");
     let bind = format!("{}:{}", ip, port);
 
-    actix_web::HttpServer::new(|| {
+    let template = Template::new();
+    template.clone().watch();
+
+    actix_web::HttpServer::new(move || {
         let data = AppData {
-            template: tera::compile_templates!("templates/**/*"),
+            template: template.clone(),
             sites: Sites::new(),
         };
         let static_files = actix_files::Files::new("/static", "static/");
