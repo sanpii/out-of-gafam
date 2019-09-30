@@ -137,7 +137,7 @@ fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn body(request: &::actix_web::HttpRequest, template: &str) -> Result<String>
+fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
 {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["name"];
@@ -149,11 +149,19 @@ fn body(request: &::actix_web::HttpRequest, template: &str) -> Result<String>
     let mut context = tera::Context::new();
     context.insert("site", site);
     context.insert("user", &user);
+    context.insert("base_url", &base_url(request));
 
     match data.template.render(template, &context) {
         Ok(body) => Ok(body),
         Err(err) => Err(err.into()),
     }
+}
+
+fn base_url(request: &actix_web::HttpRequest) -> String
+{
+    let info = request.connection_info();
+
+    format!("{}://{}", info.scheme(), info.host())
 }
 
 fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>

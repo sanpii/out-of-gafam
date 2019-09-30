@@ -16,10 +16,16 @@
         {% for post in user.posts %}
             <item>
                 <title>{{ post.name | safe | striptags }}</title>
-                <link><![CDATA[{{ post.permalink_url | safe }}]]></link>
+                {% set url = post.permalink_url %}
+
+                {% if post.permalink_url is starting_with('/') %}
+                    {% set url = base_url ~ url %}
+                {% endif %}
+
+                <link><![CDATA[{{ url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
                 <pubDate>{{ post.created_time }}</pubDate>
-                <guid><![CDATA[{{ post.permalink_url | safe }}]]></guid>
+                <guid><![CDATA[{{ url | safe }}]]></guid>
             </item>
         {% endfor %}
     </channel>
