@@ -45,12 +45,9 @@ fn main()
             .data(data)
             .route("/", actix_web::web::get().to(index))
             .route("/search", actix_web::web::post().to(search))
-            .route("/show/{site}/{name:.*}", actix_web::web::get().to(show))
             .route("/user/{site}/{name:.*}", actix_web::web::get().to(user))
             .route("/post/{site}/{id:.*}", actix_web::web::get().to(post))
             .route("/feed/{site}/{name:.*}", actix_web::web::get().to(feed))
-            .route("/show/{name:.*}", actix_web::web::get().to(show_fb))
-            .route("/feed/{name:.*}", actix_web::web::get().to(feed_fb))
             .route("/about", actix_web::web::get().to(about))
             .service(static_files)
     })
@@ -78,32 +75,13 @@ fn search(data: actix_web::web::Data<AppData>, params: actix_web::web::Form<Para
 {
     if let Some((name, id)) = data.sites.find(&params.account) {
         actix_web::HttpResponse::Found()
-            .header(actix_web::http::header::LOCATION, format!("/show/{}/{}", name, id))
+            .header(actix_web::http::header::LOCATION, format!("/user/{}/{}", name, id))
             .finish()
     }
     else {
         actix_web::HttpResponse::NotFound()
             .finish()
     }
-}
-
-fn show_fb(request: actix_web::HttpRequest) -> actix_web::HttpResponse
-{
-    let name = &request.match_info()["name"];
-
-    actix_web::HttpResponse::MovedPermanently()
-        .header(actix_web::http::header::LOCATION, format!("/show/facebook/{}", name))
-        .finish()
-}
-
-fn show(request: actix_web::HttpRequest) -> actix_web::HttpResponse
-{
-    let site = &request.match_info()["site"];
-    let name = &request.match_info()["name"];
-
-    actix_web::HttpResponse::MovedPermanently()
-        .header(actix_web::http::header::LOCATION, format!("/user/{}/{}", site, name))
-        .finish()
 }
 
 fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
@@ -115,15 +93,6 @@ fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
         .body(body);
 
     Ok(response)
-}
-
-fn feed_fb(request: actix_web::HttpRequest) -> actix_web::HttpResponse
-{
-    let name = &request.match_info()["name"];
-
-    actix_web::HttpResponse::MovedPermanently()
-        .header(actix_web::http::header::LOCATION, format!("/feed/facebook/{}", name))
-        .finish()
 }
 
 fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
