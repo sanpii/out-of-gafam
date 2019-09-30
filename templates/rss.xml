@@ -25,7 +25,7 @@
                 <link><![CDATA[{{ url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
                 <pubDate>{{ post.created_time }}</pubDate>
-                <guid><![CDATA[{{ url | safe }}]]></guid>
+                <guid><![CDATA[oog://{{ post.permalink_url | safe }}]]></guid>
             </item>
         {% endfor %}
     </channel>
