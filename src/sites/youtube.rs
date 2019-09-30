@@ -22,7 +22,7 @@ impl crate::sites::Site for Youtube
 {
     fn id(&self, url: &str) -> Option<String>
     {
-        let re = regex::Regex::new(r"https?://([^\.]+.)?youtube.com/(?P<king>channel|user)/(?P<name>[^/]+)")
+        let re = regex::Regex::new(r"https?://([^\.]+.)?youtube.com/(?P<king>channel|user|playlist)(/|\?list=)(?P<name>[^/]+)")
             .unwrap();
 
         let (king, mut name) = match re.captures(url) {
@@ -52,7 +52,12 @@ impl crate::sites::Site for Youtube
 
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
-        let url = format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id);
+        let url = if id.starts_with("PL") {
+            format!("https://www.youtube.com/feeds/videos.xml?playlist_id={}", id)
+        }
+        else {
+            format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id)
+        };
         let html = self.fetch_html(&url)?;
 
         let title_selector = scraper::Selector::parse("feed > title")
