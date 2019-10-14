@@ -52,13 +52,13 @@ impl crate::sites::Site for Youtube
 
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
-        let url = if id.starts_with("PL") {
+        let feed_url = if id.starts_with("PL") {
             format!("https://www.youtube.com/feeds/videos.xml?playlist_id={}", id)
         }
         else {
             format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id)
         };
-        let html = self.fetch_html(&url)?;
+        let html = self.fetch_html(&feed_url)?;
 
         let title_selector = scraper::Selector::parse("feed > title")
             .unwrap();
@@ -102,6 +102,9 @@ impl crate::sites::Site for Youtube
                 None => Default::default(),
             };
 
+
+            let gafam_url = format!("https://www.youtube.com/watch?v={}", id);
+
             let message = format!(r#"<iframe
         width="560"
         height="315"
@@ -112,7 +115,8 @@ impl crate::sites::Site for Youtube
 
             let post = crate::sites::Post {
                 name,
-                permalink_url: format!("/post/youtube/{}", id),
+                gafam_url,
+                url: format!("/post/youtube/{}", id),
                 id,
                 message,
                 created_time,
@@ -126,8 +130,9 @@ impl crate::sites::Site for Youtube
 
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
     {
-        let url = format!("http://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={}&format=json", id);
-        let json = self.fetch_json(&url)?;
+        let gafam_url = format!("https://www.youtube.com/watch?v={}", id);
+        let feed_url = format!("http://www.youtube.com/oembed?url={}&format=json", gafam_url);
+        let json = self.fetch_json(&feed_url)?;
 
         let message = format!(r#"<iframe
     width="560"
@@ -139,7 +144,8 @@ impl crate::sites::Site for Youtube
 
         let post = crate::sites::Post {
             name: json["title"].to_string(),
-            permalink_url: format!("https://youtube.com/watch?v={}", id),
+            url: format!("/post/youtube/{}", id),
+            gafam_url,
             id: id.to_string(),
             message,
             created_time: Default::default(),

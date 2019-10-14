@@ -70,19 +70,22 @@ impl crate::sites::Site for Facebook
                 None => continue,
             };
 
-            let permalink_url = match element.select(&link_selector).nth(0) {
+            let url = format!("/post/facebook/{}", id);
+
+            let gafam_url = match element.select(&link_selector).nth(0) {
                 Some(e) => self.rewrite_url(e.value().attr("href").unwrap_or_default()),
                 None => continue,
             };
 
-            let id = match id_regex.captures(&permalink_url) {
+            let id = match id_regex.captures(&gafam_url) {
                 Some(caps) => caps[1].to_string(),
                 None => continue,
             };
 
             let post = crate::sites::Post {
                 name,
-                permalink_url,
+                url,
+                gafam_url,
                 message,
                 created_time,
                 id,
@@ -96,6 +99,7 @@ impl crate::sites::Site for Facebook
 
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
     {
+        let url = format!("/post/facebook/{}", id);
         let mut t = id.split('-');
         let story_fbid = match t.nth(0) {
             Some(story_fbid) => story_fbid,
@@ -106,8 +110,8 @@ impl crate::sites::Site for Facebook
             None => return Err(crate::Error::NotFound),
         };
 
-        let permalink_url = format!("https://mobile.facebook.com/story.php?story_fbid={}&id={}", story_fbid, id);
-        let html = self.fetch_html(&permalink_url)?;
+        let gafam_url = format!("https://mobile.facebook.com/story.php?story_fbid={}&id={}", story_fbid, id);
+        let html = self.fetch_html(&gafam_url)?;
 
         let story_selector = scraper::Selector::parse("#m_story_permalink_view")
             .unwrap();
@@ -134,7 +138,8 @@ impl crate::sites::Site for Facebook
         let post = crate::sites::Post {
             name: title.inner_html(),
             id: id.to_string(),
-            permalink_url,
+            url,
+            gafam_url,
             message: story.inner_html(),
             created_time,
         };

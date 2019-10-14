@@ -51,15 +51,17 @@ impl crate::sites::Site for Instagram
                 _ => String::new(),
             };
             let thumbnail = &edge["node"]["thumbnail_src"];
+            let id = edge["node"]["shortcode"].to_string();
 
             let message = format!("{}<br /><img src=\"{}\" />", caption, thumbnail);
 
             let post = crate::sites::Post {
                 name: "Post".to_string(),
-                permalink_url: format!("/post/instagram/{}", edge["node"]["shortcode"]),
+                url: format!("/post/instagram/{}", id),
+                gafam_url: format!("https://www.instagram.com/p/{}", id),
                 message,
                 created_time: Self::parse_date(&edge["node"]["taken_at_timestamp"].to_string()),
-                id: edge["id"].to_string(),
+                id,
             };
 
             user.posts.push(post);
@@ -70,8 +72,9 @@ impl crate::sites::Site for Instagram
 
     fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
     {
-        let url = format!("https://www.instagram.com/p/{}/?__a=1", id);
-        let json = self.fetch_json(&url)?;
+        let gafam_url = format!("https://www.instagram.com/p/{}", id);
+        let json_url = format!("{}/?__a=1", gafam_url);
+        let json = self.fetch_json(&json_url)?;
 
         let caption = match &json["graphql"]["shortcode_media"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
             json::JsonValue::String(caption) => caption.replace("\n", "<br />"),
@@ -84,7 +87,8 @@ impl crate::sites::Site for Instagram
         let post = crate::sites::Post {
             name: "Post".to_string(),
             id: json["graphql"]["shortcode_media"]["id"].to_string(),
-            permalink_url: format!("/post/instagram/{}", json["graphql"]["shortcode_media"]["shortcode"]),
+            gafam_url,
+            url: format!("/post/instagram/{}", json["graphql"]["shortcode_media"]["shortcode"]),
             message,
             created_time: Self::parse_date(&json["graphql"]["shortcode_media"]["taken_at_timestamp"].to_string()),
         };

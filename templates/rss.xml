@@ -16,16 +16,10 @@
         {% for post in user.posts %}
             <item>
                 <title>{{ post.name | safe | striptags }}</title>
-                {% set url = post.permalink_url %}
-
-                {% if post.permalink_url is starting_with('/') %}
-                    {% set url = base_url ~ url %}
-                {% endif %}
-
-                <link><![CDATA[{{ url | safe }}]]></link>
+                <link><![CDATA[{{ post.gafam_url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
                 <pubDate>{{ post.created_time }}</pubDate>
-                <guid><![CDATA[oog://{{ post.permalink_url | safe }}]]></guid>
+                <guid><![CDATA[oog://{{ post.url | safe }}]]></guid>
             </item>
         {% endfor %}
     </channel>

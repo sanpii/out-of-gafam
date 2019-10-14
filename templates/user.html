@@ -20,7 +20,7 @@
     <ul class="posts">
         {% for post in user.posts %}
             <li class="post">
-                <a href="{{ post.permalink_url | safe }}">{{ post.name | safe }}</a>
+                <a href="{{ post.url | safe }}">{{ post.name | safe }}</a>
                 <div>
                     {{ post.message | safe }}
                 </div>

@@ -22,7 +22,8 @@ pub struct User {
 pub struct Post {
     pub id: String,
     pub name: String,
-    pub permalink_url: String,
+    pub url: String,
+    pub gafam_url: String,
     pub message: String,
     pub created_time: String,
 }
