@@ -82,6 +82,36 @@ pub trait Site {
             None => Err(crate::Error::NotFound),
         }
     }
+
+    fn select_first<'a>(&self, element: &'a scraper::ElementRef, selector: &'static str) -> Option<scraper::ElementRef<'a>>
+    {
+        match self.select(element, selector).get(0) {
+            Some(e) => Some(e.clone()),
+            None => None,
+        }
+    }
+
+    fn select<'a>(&self, element: &'a scraper::ElementRef, selector: &'static str) -> Vec<scraper::ElementRef<'a>>
+    {
+        lazy_static::lazy_static! {
+            static ref SELECTORS: std::sync::Mutex<std::collections::HashMap<&'static str, scraper::Selector>> =
+                std::sync::Mutex::new(std::collections::HashMap::new());
+        };
+
+        let mut selectors = (*SELECTORS).lock()
+            .unwrap();
+
+        if !selectors.contains_key(selector) {
+            selectors.insert(selector, scraper::Selector::parse(selector).unwrap());
+        }
+
+        let selector = selectors.get(selector)
+            .unwrap();
+
+        element.select(&selector)
+            .into_iter()
+            .collect()
+    }
 }
 
 pub struct Sites {

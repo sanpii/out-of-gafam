@@ -59,11 +59,9 @@ impl crate::sites::Site for Youtube
             format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id)
         };
         let html = self.fetch_html(&feed_url)?;
+        let root = html.root_element();
 
-        let title_selector = scraper::Selector::parse("feed > title")
-            .unwrap();
-
-        let name = match html.select(&title_selector).nth(0) {
+        let name = match self.select_first(&root, "feed > title") {
             Some(name) => name.inner_html(),
             None => return Err(crate::Error::NotFound),
         };
@@ -77,27 +75,18 @@ impl crate::sites::Site for Youtube
             posts: vec![],
         };
 
-        let entry_selector = scraper::Selector::parse("feed > entry")
-            .unwrap();
-        let title_selector = scraper::Selector::parse("title")
-            .unwrap();
-        let id_selector = scraper::Selector::parse("id")
-            .unwrap();
-        let date_selector = scraper::Selector::parse("published")
-            .unwrap();
-
-        for element in html.select(&entry_selector) {
-            let name = match element.select(&title_selector).nth(0) {
+        for element in self.select(&root, "feed > entry") {
+            let name = match self.select_first(&element, "title") {
                 Some(name) => name.inner_html(),
                 None => continue,
             };
 
-            let id = match element.select(&id_selector).nth(0) {
+            let id = match self.select_first(&element, "id") {
                 Some(id) => id.inner_html().replace("yt:video:", ""),
                 None => continue,
             };
 
-            let created_time = match element.select(&date_selector).nth(0) {
+            let created_time = match self.select_first(&element, "published") {
                 Some(created_time) => created_time.inner_html(),
                 None => Default::default(),
             };
