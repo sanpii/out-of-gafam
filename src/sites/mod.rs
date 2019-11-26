@@ -1,9 +1,11 @@
 mod facebook;
 mod instagram;
+mod twitter;
 mod youtube;
 
 use facebook::Facebook;
 use instagram::Instagram;
+use twitter::Twitter;
 use youtube::Youtube;
 
 use std::collections::HashMap;
@@ -125,6 +127,7 @@ impl Sites
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::new(Facebook::default()));
         sites.insert("instagram", Box::new(Instagram::default()));
+        sites.insert("twitter", Box::new(Twitter::default()));
         sites.insert("youtube", Box::new(Youtube::default()));
 
         Self {
