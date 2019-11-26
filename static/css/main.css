@@ -75,6 +75,11 @@ ul.posts {
     background-color: #ffff0050;
 }
 
+.sites .site.twitter, .sites .site.twitter a {
+    background-color: #1da1f2;
+    color: white;
+}
+
 .sites .site.youtube {
     background-color: #ff000050;
 }
