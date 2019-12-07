@@ -12,9 +12,13 @@ impl Template
     pub fn new() -> Self
     {
         let path = format!("{}/**/*", PATH);
+        let tera = match tera::Tera::new(&path) {
+            Ok(tera) => tera,
+            Err(err) => panic!("Parsing error(s): {}", err),
+        };
 
         Self {
-            tera: Arc::new(RwLock::new(tera::compile_templates!(&path))),
+            tera: Arc::new(RwLock::new(tera)),
         }
     }
 
