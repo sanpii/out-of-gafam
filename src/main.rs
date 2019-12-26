@@ -17,7 +17,8 @@ struct Params {
     account: String,
 }
 
-fn main()
+#[actix_rt::main]
+async fn main() -> std::io::Result<()>
 {
     env_logger::init();
 
@@ -42,7 +43,7 @@ fn main()
         let static_files = actix_files::Files::new("/static", "static/");
 
         actix_web::App::new()
-            .data(data)
+            .app_data(data)
             .route("/", actix_web::web::get().to(index))
             .route("/search", actix_web::web::post().to(search))
             .route("/user/{site}/{name:.*}", actix_web::web::get().to(user))
@@ -51,14 +52,15 @@ fn main()
             .route("/about", actix_web::web::get().to(about))
             .service(static_files)
     })
-    .bind(&bind)
-    .unwrap_or_else(|_| panic!("Can not bind to {}", bind))
+    .bind(&bind)?
     .run()
-    .unwrap();
+    .await
 }
 
-fn index(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
+async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
+    let data: &AppData = request.app_data()
+        .unwrap();
     let body = match data.template.render("index.html", &tera::Context::new()) {
         Ok(body) => body,
         Err(err) => return Err(Error::from(err)),
@@ -71,8 +73,10 @@ fn index(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn search(data: actix_web::web::Data<AppData>, params: actix_web::web::Form<Params>) -> actix_web::HttpResponse
+fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Params>) -> actix_web::HttpResponse
 {
+    let data: &AppData = request.app_data()
+        .unwrap();
     if let Some((name, id)) = data.sites.find(&params.account) {
         actix_web::HttpResponse::Found()
             .header(actix_web::http::header::LOCATION, format!("/user/{}/{}", name, id))
@@ -84,7 +88,7 @@ fn search(data: actix_web::web::Data<AppData>, params: actix_web::web::Form<Para
     }
 }
 
-fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let body = body(&request, "user.html")?;
 
@@ -95,7 +99,7 @@ fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let body = body(&request, "rss.xml")?;
 
@@ -125,8 +129,10 @@ fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
     }
 }
 
-fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
+async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
+    let data: &AppData = request.app_data()
+        .unwrap();
     let body = match data.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
         Err(err) => return Err(Error::from(err)),
@@ -139,7 +145,7 @@ fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["id"];
