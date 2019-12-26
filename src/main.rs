@@ -17,7 +17,8 @@ struct Params {
     account: String,
 }
 
-fn main()
+#[actix_rt::main]
+async fn main() -> std::io::Result<()>
 {
     env_logger::init();
 
@@ -51,13 +52,12 @@ fn main()
             .route("/about", actix_web::web::get().to(about))
             .service(static_files)
     })
-    .bind(&bind)
-    .unwrap_or_else(|_| panic!("Can not bind to {}", bind))
+    .bind(&bind)?
     .run()
-    .unwrap();
+    .await
 }
 
-fn index(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
+async fn index(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
 {
     let body = match data.template.render("index.html", &tera::Context::new()) {
         Ok(body) => body,
@@ -84,7 +84,7 @@ fn search(data: actix_web::web::Data<AppData>, params: actix_web::web::Form<Para
     }
 }
 
-fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let body = body(&request, "user.html")?;
 
@@ -95,7 +95,7 @@ fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let body = body(&request, "rss.xml")?;
 
@@ -125,7 +125,7 @@ fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
     }
 }
 
-fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
+async fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
 {
     let body = match data.template.render("about.html", &tera::Context::new()) {
         Ok(body) => body,
@@ -139,7 +139,7 @@ fn about(data: actix_web::web::Data<AppData>) -> Result<actix_web::HttpResponse>
     Ok(response)
 }
 
-fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
+async fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
 {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["id"];
