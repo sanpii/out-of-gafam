@@ -53,11 +53,9 @@ pub trait Site {
 
     fn fetch(&self, url: &str) -> crate::Result<String>
     {
-        let client = reqwest::Client::new();
-
-        let mut response = client.get(url)
-            .header(reqwest::header::USER_AGENT, "Mozilla")
-            .header(reqwest::header::ACCEPT_LANGUAGE, "en-US")
+        let response = attohttpc::get(url)
+            .header("User-Agent", "Mozilla")
+            .header("Accept-Language", "en-US")
             .send()?;
 
         if response.status().is_success() {

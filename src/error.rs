@@ -2,7 +2,7 @@
 pub enum Error {
     Json(json::JsonError),
     NotFound,
-    Request(reqwest::Error),
+    Request(attohttpc::Error),
     Template(tera::Error),
 }
 
@@ -44,9 +44,9 @@ impl From<tera::Error> for Error
     }
 }
 
-impl From<reqwest::Error> for Error
+impl From<attohttpc::Error> for Error
 {
-    fn from(err: reqwest::Error) -> Self
+    fn from(err: attohttpc::Error) -> Self
     {
         Error::Request(err)
     }
