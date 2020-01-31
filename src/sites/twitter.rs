@@ -14,18 +14,40 @@ impl crate::sites::Site for Twitter
 {
     fn id(&self, url: &str) -> Option<String>
     {
+        let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/search\?q=(?P<search>[^&]+)")
+            .unwrap();
+
+        match re.captures(url) {
+            Some(caps) => return Some(caps["search"].to_string()),
+            None => (),
+        };
+
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)")
             .unwrap();
 
         match re.captures(url) {
-            Some(caps) => Some(caps["name"].to_string()),
+            Some(caps) => Some(format!("@{}", caps["name"].to_string())),
             None => None,
         }
     }
 
     fn user(&self, id: &str) -> crate::Result<crate::sites::User>
     {
-        let url = format!("https://mobile.twitter.com/{}", id);
+        let (url, gafam_url) = if id.starts_with('@') {
+            (
+                format!("https://mobile.twitter.com/{}", id),
+                format!("https://twitter.com/{}", id),
+            )
+        }
+        else {
+            let id = urlencoding::encode(id);
+
+            (
+                format!("https://mobile.twitter.com/search?q={}", id),
+                format!("https://twitter.com/search?q={}", id),
+            )
+        };
+
         let html = self.fetch_html(&url)?;
         let root = html.root_element();
 
@@ -34,9 +56,13 @@ impl crate::sites::Site for Twitter
             name: self.og(&html, "title")
                 .unwrap_or_else(|_| id.to_string()),
             description: None,
-            url: format!("https://twitter.com/{}", id),
-            image: self.select_first(&root, "img[src^=\"https://pbs.twimg.com/profile_images/\"]")
-                .and_then(|e| e.value().attr("src").and_then(|e| Some(e.to_string()))),
+            url: gafam_url,
+            image: if id.starts_with('@') {
+                self.select_first(&root, "img[src^=\"https://pbs.twimg.com/profile_images/\"]")
+                    .and_then(|e| e.value().attr("src").and_then(|e| Some(e.to_string())))
+            } else {
+                None
+            },
             posts: vec![],
         };
 
