@@ -3,7 +3,7 @@ pub struct Instagram {
 
 impl std::fmt::Display for Instagram
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error>
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error>
     {
         write!(f, "instagram")
     }

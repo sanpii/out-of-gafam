@@ -83,7 +83,7 @@ pub trait Site {
         }
     }
 
-    fn select_first<'a>(&self, element: &'a scraper::ElementRef, selector: &'static str) -> Option<scraper::ElementRef<'a>>
+    fn select_first<'a>(&self, element: &'a scraper::ElementRef<'_>, selector: &'static str) -> Option<scraper::ElementRef<'a>>
     {
         match self.select(element, selector).get(0) {
             Some(e) => Some(e.clone()),
@@ -91,7 +91,7 @@ pub trait Site {
         }
     }
 
-    fn select<'a>(&self, element: &'a scraper::ElementRef, selector: &'static str) -> Vec<scraper::ElementRef<'a>>
+    fn select<'a>(&self, element: &'a scraper::ElementRef<'_>, selector: &'static str) -> Vec<scraper::ElementRef<'a>>
     {
         lazy_static::lazy_static! {
             static ref SELECTORS: std::sync::Mutex<std::collections::HashMap<&'static str, scraper::Selector>> =
