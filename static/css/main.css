@@ -2,6 +2,20 @@ body {
     background-color: #f5f5f5;
 }
 
+iframe {
+    height: 50%;
+    width: 100%;
+}
+
+.form {
+    padding: 20px;
+}
+
+#preview {
+    overflow-y: auto;
+    height: 540px;
+}
+
 .logo {
     text-align: center;
 }
@@ -19,12 +33,12 @@ footer {
     padding-left: 15px;
 }
 
-form {
+form#search {
     max-width: 330px;
     margin: auto;
 }
 
-form .form-control {
+form#search .form-control {
     position: relative;
     box-sizing: border-box;
     height: auto;
@@ -32,7 +46,7 @@ form .form-control {
     font-size: 16px;
 }
 
-form input {
+form#search input {
     margin-bottom: 10px;
 }
 

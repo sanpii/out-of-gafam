@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block logo %}{% endblock %}
+
+{% block content %}
+    <iframe src="{{ iframe }}"></iframe>
+
+    <div class="row row-col-2 form">
+        <form class="col" method="get">
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="channel_link">Link: </label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="channel_link" required value="{{ data.channel_link }}" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="channel_title">Title: </label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="channel_title" required value="{{ data.channel_title }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="channel_description">Description:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="channel_description" value="{{ data.channel_description }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="channel_image">Image URL:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="channel_image" value="{{ data.channel_image }}" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item">Items:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="items" required value="{{ data.items }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item_title">Item title:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="item_title" required value="{{ data.item_title }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item_link">Item link:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="item_link" required value="{{ data.item_link }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item_description">Item description:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="item_description" required value="{{ data.item_description }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item_pubdate">Item publication date:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="item_pubdate" required value="{{ data.item_pubdate }}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="item_guid">Item guid:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" name="item_guid" value="{{ data.item_guid }}" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary" name="action" value="preview">Preview</button>
+            <button type="submit" formmethod="post" class="btn btn-primary" name="action" value="submit">Submit</button>
+        </form>
+
+        <figure class="highlight col" id="preview">
+            {% include "blocks/preview.html" %}
+        </figure>
+    </div>
+{% endblock %}

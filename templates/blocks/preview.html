@@ -1,0 +1,22 @@
+<h1><a href="{{ user.url | safe }}">{{ user.name }}</a></h1>
+
+{% if user.image %}
+    <img class="mb-4" src="{{ user.image | safe }}" />
+{% endif %}
+
+{% block content %}
+    <p>{{ user.description }}</p>
+    <ul class="posts">
+        {% for post in user.posts %}
+            <li class="post">
+                <a href="{{ post.url | safe }}">{{ post.name | safe }}</a>
+                <div>
+                    {{ post.message | safe }}
+                </div>
+                <div>
+                    {{ post.created_time }}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

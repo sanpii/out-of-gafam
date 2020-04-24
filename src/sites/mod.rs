@@ -1,8 +1,10 @@
+mod custom;
 mod facebook;
 mod instagram;
 mod twitter;
 mod youtube;
 
+use custom::Custom;
 use facebook::Facebook;
 use instagram::Instagram;
 use twitter::Twitter;
@@ -32,7 +34,7 @@ pub struct Post {
 
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
-    fn user(&self, id: &str) -> crate::Result<self::User>;
+    fn user(&self, elephantry: &elephantry::Pool, id: &str) -> crate::Result<self::User>;
     fn post(&self, id: &str) -> crate::Result<self::Post>;
 
     fn fetch_json(&self, url: &str) -> crate::Result<json::JsonValue>
@@ -125,6 +127,7 @@ impl Sites
         sites.insert("instagram", Box::new(Instagram::default()));
         sites.insert("twitter", Box::new(Twitter::default()));
         sites.insert("youtube", Box::new(Youtube::default()));
+        sites.insert("custom", Box::new(Custom::default()));
 
         Self {
             sites,
@@ -143,14 +146,14 @@ impl Sites
         None
     }
 
-    pub fn user(&self, name: &str, id: &str) -> crate::Result<User>
+    pub fn user(&self, elephantry: &elephantry::Pool, name: &str, id: &str) -> crate::Result<User>
     {
         let site = match self.sites.get(name) {
             Some(site) => site,
             None => return Err(crate::Error::NotFound),
         };
 
-        site.user(id)
+        site.user(elephantry, id)
     }
 
     pub fn post(&self, name: &str, id: &str) -> crate::Result<Post>
@@ -161,5 +164,9 @@ impl Sites
         };
 
         site.post(id)
+    }
+
+    pub fn preview(site: &crate::site::Entity) -> crate::Result<User> {
+        Custom::preview(site)
     }
 }

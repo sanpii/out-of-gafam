@@ -27,7 +27,7 @@
 
                     </ul>
 
-                    {% if user.id is defined %}
+                    {% if site is defined and user.id is defined %}
                         <ul class="navbar-nav mt-2 mt-md-0">
                             <li class="nav-item">
                                 <a class="nav-link" href="/feed/{{ site }}/{{ user.id }}">
