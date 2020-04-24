@@ -92,11 +92,11 @@ impl crate::sites::Site for Facebook
     {
         let url = format!("/post/facebook/{}", id);
         let mut t = id.split('-');
-        let story_fbid = match t.nth(0) {
+        let story_fbid = match t.next() {
             Some(story_fbid) => story_fbid,
             None => return Err(crate::Error::NotFound),
         };
-        let id = match t.nth(0) {
+        let id = match t.next() {
             Some(id) => id,
             None => return Err(crate::Error::NotFound),
         };

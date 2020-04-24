@@ -72,7 +72,7 @@ pub trait Site {
         let selector = scraper::Selector::parse(&s)
             .unwrap();
 
-        let element = match html.select(&selector).nth(0) {
+        let element = match html.select(&selector).next() {
             Some(element) => element,
             None => return Err(crate::Error::NotFound),
         };
@@ -86,7 +86,7 @@ pub trait Site {
     fn select_first<'a>(&self, element: &'a scraper::ElementRef<'_>, selector: &'static str) -> Option<scraper::ElementRef<'a>>
     {
         match self.select(element, selector).get(0) {
-            Some(e) => Some(e.clone()),
+            Some(e) => Some(*e),
             None => None,
         }
     }
@@ -108,9 +108,7 @@ pub trait Site {
         let selector = selectors.get(selector)
             .unwrap();
 
-        element.select(&selector)
-            .into_iter()
-            .collect()
+        element.select(&selector).collect()
     }
 }
 

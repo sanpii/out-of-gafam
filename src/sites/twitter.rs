@@ -17,10 +17,9 @@ impl crate::sites::Site for Twitter
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/search\?q=(?P<search>[^&]+)")
             .unwrap();
 
-        match re.captures(url) {
-            Some(caps) => return Some(caps["search"].to_string()),
-            None => (),
-        };
+        if let Some(caps) = re.captures(url) {
+            return Some(caps["search"].to_string());
+        }
 
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)")
             .unwrap();
@@ -59,7 +58,7 @@ impl crate::sites::Site for Twitter
             url: gafam_url,
             image: if id.starts_with('@') {
                 self.select_first(&root, "img[src^=\"https://pbs.twimg.com/profile_images/\"]")
-                    .and_then(|e| e.value().attr("src").and_then(|e| Some(e.to_string())))
+                    .and_then(|e| e.value().attr("src").map(|e| e.to_string()))
             } else {
                 None
             },
