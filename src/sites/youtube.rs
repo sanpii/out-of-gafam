@@ -1,4 +1,5 @@
 pub struct Youtube {
+    invidious: String,
 }
 
 impl std::fmt::Display for Youtube
@@ -9,11 +10,11 @@ impl std::fmt::Display for Youtube
     }
 }
 
-impl Default for Youtube
-{
-    fn default() -> Self
-    {
+impl Default for Youtube {
+    fn default() -> Self {
         Self {
+            invidious: std::env::var("INVIDIOUS")
+                .unwrap_or_else(|_| "https://invidio.us".to_string()),
         }
     }
 }
@@ -97,10 +98,12 @@ impl crate::sites::Site for Youtube
             let message = format!(r#"<iframe
         width="560"
         height="315"
-        src="https://invidio.us/embed/{}"
+        src="{}/embed/{}"
         frameborder="0"
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
-        ></iframe>"#, id);
+        ></iframe>"#,
+                self.invidious, id,
+            );
 
             let post = crate::sites::Post {
                 name,
@@ -126,10 +129,12 @@ impl crate::sites::Site for Youtube
         let message = format!(r#"<iframe
     width="560"
     height="315"
-    src="https://invidio.us/embed/{}"
+    src="{}/embed/{}"
     frameborder="0"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
-    ></iframe>"#, id);
+    ></iframe>"#,
+            self.invidious, id,
+        );
 
         let post = crate::sites::Post {
             name: json["title"].to_string(),
