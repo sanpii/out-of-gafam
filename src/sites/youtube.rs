@@ -23,7 +23,7 @@ impl crate::sites::Site for Youtube
 {
     fn id(&self, url: &str) -> Option<String>
     {
-        let re = regex::Regex::new(r"https?://([^\.]+.)?youtube.com/(?P<king>channel|user|playlist)(/|\?list=)(?P<name>[^/]+)")
+        let re = regex::Regex::new(r"https?://([^\.]+.)?youtube.com/(?P<king>c(hannel)?|user|playlist)(/|\?list=)(?P<name>[^/]+)")
             .unwrap();
 
         let (king, mut name) = match re.captures(url) {
@@ -31,7 +31,7 @@ impl crate::sites::Site for Youtube
             None => return None,
         };
 
-        if &king == "user" {
+        if &king == "user" || &king == "channel" || &king == "c" {
             let html = match self.fetch_html(&url) {
                 Ok(contents) => contents,
                 Err(_) => return None,
