@@ -56,7 +56,7 @@ impl elephantry::Structure for Structure
         &["id"]
     }
 
-    fn definition() -> &'static [&'static str]
+    fn columns() -> &'static [&'static str]
     {
         &[
             "id",
