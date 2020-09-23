@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  database:
+    image: "postgres:latest"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: oog
+    volumes:
+      - ./src/sql/structure.sql:/docker-entrypoint-initdb.d/structure.sql
+
+  app:
+    build: .
+    restart: always
+    environment:
+      LISTEN_IP: 0.0.0.0
+      LISTEN_PORT: 8000
+      DATABASE_URL: postgres://postgres:test@database/oog
+      RUST_LOG: info
+    ports:
+      - 8000:8000
+    depends_on:
+      - database
+    links:
+      - database
