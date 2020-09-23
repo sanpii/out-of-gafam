@@ -1,6 +1,6 @@
-BOWER_FLAGS=
-CARGO=cargo
-CARGO_FLAGS=
+BOWER_FLAGS?=
+CARGO?=cargo
+CARGO_FLAGS?=
 
 ifeq ($(APP_ENVIRONMENT),prod)
 	TARGET=target/release/off
