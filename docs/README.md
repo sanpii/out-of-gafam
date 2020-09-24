@@ -19,6 +19,13 @@ make
 
 ## Installation
 
+Create a new PostgreSQL database:
+
+```
+createdb oog
+psql -f src/sql/structure.sql oog
+```
+
 Here an example of systemd service:
 
 ```
@@ -31,5 +38,6 @@ WorkingDirectory=/home/git/public_repositories/out-of-gafam/current
 Restart=on-failure
 Environment="LISTEN_IP=127.0.0.1"
 Environment="LISTEN_PORT=8000"
+Environment="DATABASE_URL=postgresql://localhost/oog"
 Environment="RUST_LOG=warn"
 ```
