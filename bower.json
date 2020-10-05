@@ -1,8 +1,0 @@
-{
-    "name": "oog",
-    "dependencies": {
-        "bootstrap": "^4.2",
-        "Font-Awesome": "^5.6"
-    }
-}
-
