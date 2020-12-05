@@ -3,16 +3,14 @@
 mod error;
 mod sites;
 mod site;
-mod template;
 
 use error::Error;
 use error::Result;
 use sites::Sites;
-use template::Template;
 
 struct AppData {
     sites: Sites,
-    template: Template,
+    template: tera_hot::Template,
     elephantry: elephantry::Pool,
 }
 
@@ -20,6 +18,8 @@ struct AppData {
 struct Params {
     account: String,
 }
+
+static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>
@@ -38,7 +38,7 @@ async fn main() -> std::io::Result<()>
         .expect("Missing LISTEN_IP env variable");
     let bind = format!("{}:{}", ip, port);
 
-    let template = Template::new();
+    let template = tera_hot::Template::new(TEMPLATE_DIR);
     template.clone().watch();
 
     actix_web::HttpServer::new(move || {
