@@ -1,32 +1,23 @@
-#[derive(Debug)]
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    Io(std::io::Error),
-    Json(json::JsonError),
-    Elephantry(elephantry::Error),
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Invalid json response: {0}")]
+    Json(#[from] json::JsonError),
+    #[error("Database error: {0}")]
+    Elephantry(#[from] elephantry::Error),
+    #[error("Not found")]
     NotFound,
-    Request(attohttpc::Error),
-    Serde(serde_json::Error),
-    Template(tera::Error),
-    Url(urlencoding::FromUrlEncodingError),
-}
-
-impl std::fmt::Display for Error
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
-    {
-        let s = match self {
-            Error::Io(_) => "I/O error",
-            Error::Json(_) => "Invalid json response",
-            Error::Elephantry(_) => "Database error",
-            Error::NotFound => "Not found",
-            Error::Request(_) => "Unable to fetch remote resource",
-            Error::Serde(_) => "Serede error",
-            Error::Template(_) => "Template error",
-            Error::Url(_) => "URL decoding error",
-        };
-
-        write!(f, "{}", s)
-    }
+    #[error("Unable to fetch remote resource: {0}")]
+    Request(#[from] attohttpc::Error),
+    #[error("Sere error{0}")]
+    Serde(#[from] serde_json::Error),
+    #[error("Template error: {0}")]
+    Template(#[from] tera::Error),
+    #[error("URL decoding error: {0}")]
+    Url(#[from] urlencoding::FromUrlEncodingError),
 }
 
 impl Into<actix_web::http::StatusCode> for &Error
@@ -45,62 +36,6 @@ impl Into<actix_web::http::StatusCode> for &Error
             Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Url(_) => StatusCode::NOT_FOUND,
         }
-    }
-}
-
-impl From<elephantry::Error> for Error
-{
-    fn from(err: elephantry::Error) -> Self
-    {
-        Error::Elephantry(err)
-    }
-}
-
-impl From<std::io::Error> for Error
-{
-    fn from(err: std::io::Error) -> Self
-    {
-        Error::Io(err)
-    }
-}
-
-impl From<tera::Error> for Error
-{
-    fn from(err: tera::Error) -> Self
-    {
-        Error::Template(err)
-    }
-}
-
-impl From<attohttpc::Error> for Error
-{
-    fn from(err: attohttpc::Error) -> Self
-    {
-        Error::Request(err)
-    }
-}
-
-impl From<json::JsonError> for Error
-{
-    fn from(err: json::JsonError) -> Self
-    {
-        Error::Json(err)
-    }
-}
-
-impl From<urlencoding::FromUrlEncodingError> for Error
-{
-    fn from(err: urlencoding::FromUrlEncodingError) -> Self
-    {
-        Error::Url(err)
-    }
-}
-
-impl From<serde_json::Error> for Error
-{
-    fn from(err: serde_json::Error) -> Self
-    {
-        Error::Serde(err)
     }
 }
 
@@ -126,5 +61,3 @@ impl actix_web::error::ResponseError for Error
             .body(body)
     }
 }
-
-pub type Result<T> = std::result::Result<T, Error>;

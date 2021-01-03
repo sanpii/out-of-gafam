@@ -74,10 +74,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 {
     let data: &AppData = request.app_data()
         .unwrap();
-    let body = match data.template.render("index.html", &tera::Context::new()) {
-        Ok(body) => body,
-        Err(err) => return Err(Error::from(err)),
-    };
+    let body = data.template.render("index.html", &tera::Context::new())?;
 
     let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
@@ -161,10 +158,7 @@ async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 {
     let data: &AppData = request.app_data()
         .unwrap();
-    let body = match data.template.render("about.html", &tera::Context::new()) {
-        Ok(body) => body,
-        Err(err) => return Err(Error::from(err)),
-    };
+    let body = data.template.render("about.html", &tera::Context::new())?;
 
     let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
@@ -186,10 +180,7 @@ async fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse
     context.insert("site", site);
     context.insert("post", &post);
 
-    let body = match data.template.render("post.html", &context) {
-        Ok(body) => body,
-        Err(err) => return Err(err.into()),
-    };
+    let body = data.template.render("post.html", &context)?;
 
     let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
