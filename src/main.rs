@@ -24,11 +24,11 @@ static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 #[actix_web::main]
 async fn main() -> std::io::Result<()>
 {
-    env_logger::init();
-
     #[cfg(debug_assertions)]
     dotenv::dotenv()
         .ok();
+
+    env_logger::init();
 
     let database_url = std::env::var("DATABASE_URL")
         .expect("Missing DATABASE_URL env variable");
