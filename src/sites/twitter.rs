@@ -78,8 +78,6 @@ impl crate::sites::Site for Twitter
                 None => continue,
             };
 
-            let url = format!("/post/twitter/{}", id);
-
             let gafam_url = match element.value().attr("href") {
                 Some(gafam_url) => format!("https://twitter.com{}", gafam_url),
                 None => continue,
@@ -87,8 +85,7 @@ impl crate::sites::Site for Twitter
 
             let post = crate::sites::Post {
                 name,
-                url,
-                gafam_url,
+                url: gafam_url,
                 message,
                 created_time,
                 id,
@@ -98,41 +95,6 @@ impl crate::sites::Site for Twitter
         }
 
         Ok(user)
-    }
-
-    fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
-    {
-        let url = format!("/post/twitter/{}", id);
-
-        let gafam_url = format!("https://mobile.twitter.com/oog/status/{}", id);
-        let html = self.fetch_html(&gafam_url)?;
-        let root = html.root_element();
-
-        let name = match self.select_first(&root, ".username") {
-            Some(e) => format!("tweet de {}", e.text().collect::<Vec<_>>().join("")),
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let message = match self.select_first(&root, ".tweet-text") {
-            Some(e) => e.inner_html(),
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let created_time = match self.select_first(&root, ".tweet-content .metadata a") {
-            Some(e) => Self::parse_date(&e.inner_html()),
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let post = crate::sites::Post {
-            name,
-            id: id.to_string(),
-            url,
-            gafam_url,
-            message,
-            created_time,
-        };
-
-        Ok(post)
     }
 }
 

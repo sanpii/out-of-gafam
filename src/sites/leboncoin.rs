@@ -33,22 +33,16 @@ impl super::Site for Leboncoin
         for ad in json["ads"].members() {
             let post = crate::sites::Post {
                 created_time: ad["index_date"].to_string(),
-                gafam_url: ad["url"].to_string(),
+                url: ad["url"].to_string(),
                 id: ad["list_id"].to_string(),
                 message: ad["body"].to_string(),
                 name: ad["subject"].to_string(),
-                url: ad["url"].to_string(),
             };
 
             user.posts.push(post);
         }
 
         Ok(user)
-    }
-
-    fn post(&self, _: &str) -> crate::error::Result<super::Post>
-    {
-        todo!()
     }
 }
 

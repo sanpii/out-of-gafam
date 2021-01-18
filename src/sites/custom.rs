@@ -37,11 +37,6 @@ impl crate::sites::Site for Custom
 
         Self::preview(&entity)
     }
-
-    fn post(&self, _: &str) -> crate::Result<crate::sites::Post>
-    {
-        Err(crate::Error::NotFound)
-    }
 }
 
 impl Custom
@@ -62,7 +57,6 @@ impl Custom
                 id: String::new(),
                 name: Self::get_one(&element, Some(&data.item_title)).unwrap_or_else(|| data.item_title.clone()),
                 url: Self::get_one(&element, Some(&data.item_link)).unwrap_or_else(|| data.item_link.clone()),
-                gafam_url: String::new(),
                 message: Self::get_one(&element, Some(&data.item_description)).unwrap_or_else(|| data.item_description.clone()),
                 created_time: Self::get_one(&element, Some(&data.item_pubdate)).unwrap_or_else(|| data.item_pubdate.clone()),
             });

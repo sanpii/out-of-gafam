@@ -29,7 +29,6 @@ pub struct Post {
     pub id: String,
     pub name: String,
     pub url: String,
-    pub gafam_url: String,
     pub message: String,
     pub created_time: String,
 }
@@ -37,7 +36,6 @@ pub struct Post {
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
     fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<self::User>;
-    fn post(&self, id: &str) -> crate::Result<self::Post>;
 
     fn post_json(&self, url: &str, body: &str) -> crate::Result<json::JsonValue>
     {
@@ -195,16 +193,6 @@ impl Sites
         };
 
         site.user(elephantry, id, params)
-    }
-
-    pub fn post(&self, name: &str, id: &str) -> crate::Result<Post>
-    {
-        let site = match self.sites.get(name) {
-            Some(site) => site,
-            None => return Err(crate::Error::NotFound),
-        };
-
-        site.post(id)
     }
 
     pub fn preview(site: &crate::site::Entity) -> crate::Result<User> {

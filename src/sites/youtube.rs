@@ -93,7 +93,7 @@ impl crate::sites::Site for Youtube
             };
 
 
-            let gafam_url = format!("https://www.youtube.com/watch?v={}", id);
+            let url = format!("https://www.youtube.com/watch?v={}", id);
 
             let message = format!(r#"<iframe
         width="560"
@@ -107,8 +107,7 @@ impl crate::sites::Site for Youtube
 
             let post = crate::sites::Post {
                 name,
-                gafam_url,
-                url: format!("/post/youtube/{}", id),
+                url,
                 id,
                 message,
                 created_time,
@@ -118,33 +117,5 @@ impl crate::sites::Site for Youtube
         }
 
         Ok(user)
-    }
-
-    fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
-    {
-        let gafam_url = format!("https://www.youtube.com/watch?v={}", id);
-        let feed_url = format!("http://www.youtube.com/oembed?url={}&format=json", gafam_url);
-        let json = self.fetch_json(&feed_url)?;
-
-        let message = format!(r#"<iframe
-    width="560"
-    height="315"
-    src="{}/embed/{}"
-    frameborder="0"
-    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
-    ></iframe>"#,
-            self.invidious, id,
-        );
-
-        let post = crate::sites::Post {
-            name: json["title"].to_string(),
-            url: format!("/post/youtube/{}", id),
-            gafam_url,
-            id: id.to_string(),
-            message,
-            created_time: Default::default(),
-        };
-
-        Ok(post)
     }
 }

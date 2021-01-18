@@ -60,7 +60,6 @@ async fn main() -> std::io::Result<()>
             .route("/preview", actix_web::web::post().to(save))
             .route("/iframe", actix_web::web::get().to(iframe))
             .route("/user/{site}/{name:.*}", actix_web::web::get().to(user))
-            .route("/post/{site}/{id:.*}", actix_web::web::get().to(post))
             .route("/feed/{site}/{name:.*}", actix_web::web::get().to(feed))
             .route("/about", actix_web::web::get().to(about))
             .service(static_files)
@@ -161,28 +160,6 @@ async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     let data: &AppData = request.app_data()
         .unwrap();
     let body = data.template.render("about.html", &tera::Context::new())?;
-
-    let response = actix_web::HttpResponse::Ok()
-        .content_type("text/html")
-        .body(body);
-
-    Ok(response)
-}
-
-async fn post(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
-{
-    let site = &request.match_info()["site"];
-    let name = &request.match_info()["id"];
-    let data: &AppData = request.app_data()
-        .unwrap();
-
-    let post = data.sites.post(site, name)?;
-
-    let mut context = tera::Context::new();
-    context.insert("site", site);
-    context.insert("post", &post);
-
-    let body = data.template.render("post.html", &context)?;
 
     let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")

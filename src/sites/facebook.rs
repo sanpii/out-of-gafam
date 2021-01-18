@@ -61,14 +61,12 @@ impl crate::sites::Site for Facebook
                 None => continue,
             };
 
-            let url = format!("/post/facebook/{}", id);
-
-            let gafam_url = match self.select_first(&element, "div:last-child > div:last-child > a:last-child") {
+            let url = match self.select_first(&element, "div:last-child > div:last-child > a:last-child") {
                 Some(e) => self.rewrite_url(e.value().attr("href").unwrap_or_default()),
                 None => continue,
             };
 
-            let id = match id_regex.captures(&gafam_url) {
+            let id = match id_regex.captures(&url) {
                 Some(caps) => caps[1].to_string(),
                 None => continue,
             };
@@ -76,7 +74,6 @@ impl crate::sites::Site for Facebook
             let post = crate::sites::Post {
                 name,
                 url,
-                gafam_url,
                 message,
                 created_time,
                 id,
@@ -86,50 +83,6 @@ impl crate::sites::Site for Facebook
         }
 
         Ok(user)
-    }
-
-    fn post(&self, id: &str) -> crate::Result<crate::sites::Post>
-    {
-        let url = format!("/post/facebook/{}", id);
-        let mut t = id.split('-');
-        let story_fbid = match t.next() {
-            Some(story_fbid) => story_fbid,
-            None => return Err(crate::Error::NotFound),
-        };
-        let id = match t.next() {
-            Some(id) => id,
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let gafam_url = format!("https://mobile.facebook.com/story.php?story_fbid={}&id={}", story_fbid, id);
-        let html = self.fetch_html(&gafam_url)?;
-        let root = html.root_element();
-
-        let story = match self.select_first(&root, "#m_story_permalink_view") {
-            Some(story) => story,
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let title = match self.select_first(&root, "#m_story_permalink_view h3 > span > strong > a") {
-            Some(title) => title,
-            None => return Err(crate::Error::NotFound),
-        };
-
-        let created_time = match self.select_first(&story, "abbr") {
-            Some(e) => Self::parse_date(&e.inner_html()),
-            None => Default::default(),
-        };
-
-        let post = crate::sites::Post {
-            name: title.inner_html(),
-            id: id.to_string(),
-            url,
-            gafam_url,
-            message: story.inner_html(),
-            created_time,
-        };
-
-        Ok(post)
     }
 }
 

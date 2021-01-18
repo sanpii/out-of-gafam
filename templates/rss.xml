@@ -16,7 +16,7 @@
         {% for post in user.posts %}
             <item>
                 <title>{{ post.name | safe | striptags }}</title>
-                <link><![CDATA[{{ post.gafam_url | safe }}]]></link>
+                <link><![CDATA[{{ post.url | safe }}]]></link>
                 <description><![CDATA[{{ post.message | safe }}]]></description>
                 <pubDate>{{ post.created_time }}</pubDate>
                 <guid><![CDATA[oog://{{ post.url | safe }}]]></guid>
