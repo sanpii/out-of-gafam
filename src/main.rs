@@ -139,13 +139,15 @@ fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
 {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["name"];
+    let params = request.query_string();
     let data: &AppData = request.app_data()
         .unwrap();
 
-    let user = data.sites.user(&data.elephantry, site, name)?;
+    let user = data.sites.user(&data.elephantry, site, name, params)?;
 
     let mut context = tera::Context::new();
     context.insert("site", site);
+    context.insert("params", &params);
     context.insert("user", &user);
 
     match data.template.render(template, &context) {

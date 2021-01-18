@@ -30,7 +30,7 @@ impl crate::sites::Site for Twitter
         }
     }
 
-    fn user(&self, _: &elephantry::Pool, id: &str) -> crate::Result<crate::sites::User>
+    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
     {
         let (url, gafam_url) = if id.starts_with('@') {
             (

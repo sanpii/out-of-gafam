@@ -31,7 +31,7 @@ impl crate::sites::Site for Instagram
         }
     }
 
-    fn user(&self, _: &elephantry::Pool, id: &str) -> crate::Result<crate::sites::User>
+    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
     {
         let url = format!("https://www.instagram.com/{}/?__a=1", id);
         let json = self.fetch_json(&url)?;
