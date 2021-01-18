@@ -7,11 +7,11 @@ edition = "2018"
 [dependencies]
 actix-files = "0.5"
 actix-web = "3.0"
-attohttpc = "0.16"
 chrono = "0.4"
 chrono-english = "0.1"
 dotenv = "0.15"
 env_logger = "0.8"
+form_urlencoded = "1.0.0"
 json = "0.12"
 lazy_static = "1.4"
 log = "0.4"
@@ -26,9 +26,9 @@ thiserror = "1.0"
 url = "2.2"
 urlencoding = "1.0"
 
-[dependencies.uuid]
-version = "0.8"
-features = ["serde"]
+[dependencies.attohttpc]
+version = "0.16"
+features = ["json"]
 
 [dependencies.elephantry]
 version = "1.0"

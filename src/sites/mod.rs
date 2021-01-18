@@ -1,11 +1,13 @@
 mod custom;
 mod facebook;
+mod leboncoin;
 mod instagram;
 mod twitter;
 mod youtube;
 
 use custom::Custom;
 use facebook::Facebook;
+use leboncoin::Leboncoin;
 use instagram::Instagram;
 use twitter::Twitter;
 use youtube::Youtube;
@@ -34,26 +36,36 @@ pub struct Post {
 
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
-    fn user(&self, elephantry: &elephantry::Pool, id: &str) -> crate::Result<self::User>;
+    fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<self::User>;
     fn post(&self, id: &str) -> crate::Result<self::Post>;
+
+    fn post_json(&self, url: &str, body: &str) -> crate::Result<json::JsonValue>
+    {
+        self.json(attohttpc::Method::POST, &url, Some(body))
+    }
 
     fn fetch_json(&self, url: &str) -> crate::Result<json::JsonValue>
     {
-        let contents = self.fetch(&url)?;
-        let json = json::parse(&contents)?;
-
-        Ok(json)
+        self.json(attohttpc::Method::GET, &url, None)
     }
 
     fn fetch_html(&self, url: &str) -> crate::Result<scraper::html::Html>
     {
-        let contents = self.fetch(&url)?;
+        let contents = self.fetch(attohttpc::Method::GET, &url, None)?;
         let html = scraper::Html::parse_document(&contents);
 
         Ok(html)
     }
 
-    fn fetch(&self, url: &str) -> crate::Result<String>
+    fn json(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<json::JsonValue>
+    {
+        let contents = self.fetch(method, &url, body)?;
+        let json = json::parse(&contents)?;
+
+        Ok(json)
+    }
+
+    fn fetch(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<String>
     {
         let http_proxy = std::env::var("http_proxy")
             .map(|x| url::Url::parse(&x).ok())
@@ -70,18 +82,28 @@ pub trait Site {
             .https_proxy(https_proxy)
             .build();
 
-        let mut session = attohttpc::Session::new();
-        session.proxy_settings(settings);
-
-        let response = session.get(url)
-            .header("User-Agent", "Mozilla")
+        let request = attohttpc::RequestBuilder::new(method, url)
+            .proxy_settings(settings)
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0")
             .header("Accept-Language", "en-US")
-            .send()?;
+            .header("Cache-control", "no-cache");
+
+        let response = if let Some(body) = body {
+            request
+                .header("Content-Type", "application/json")
+                .header("Accept", "*/*")
+                .text(&body)
+                .send()
+        } else {
+            request.send()
+        }?;
+
 
         if response.status().is_success() {
             Ok(response.text()?)
         }
         else {
+            log::error!("{:#?}", response);
             Err(crate::Error::NotFound)
         }
     }
@@ -142,6 +164,7 @@ impl Sites
     {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::new(Facebook::default()));
+        sites.insert("leboncoin", Box::new(Leboncoin::default()));
         sites.insert("instagram", Box::new(Instagram::default()));
         sites.insert("twitter", Box::new(Twitter::default()));
         sites.insert("youtube", Box::new(Youtube::default()));
@@ -164,14 +187,14 @@ impl Sites
         None
     }
 
-    pub fn user(&self, elephantry: &elephantry::Pool, name: &str, id: &str) -> crate::Result<User>
+    pub fn user(&self, elephantry: &elephantry::Pool, name: &str, id: &str, params: &str) -> crate::Result<User>
     {
         let site = match self.sites.get(name) {
             Some(site) => site,
             None => return Err(crate::Error::NotFound),
         };
 
-        site.user(elephantry, id)
+        site.user(elephantry, id, params)
     }
 
     pub fn post(&self, name: &str, id: &str) -> crate::Result<Post>

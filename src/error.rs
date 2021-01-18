@@ -10,6 +10,10 @@ pub enum Error {
     Elephantry(#[from] elephantry::Error),
     #[error("Not found")]
     NotFound,
+    #[error("Parse float error: {0}")]
+    ParseFloat(#[from] std::num::ParseFloatError),
+    #[error("Parse int error: {0}")]
+    ParseInt(#[from] std::num::ParseIntError),
     #[error("Unable to fetch remote resource: {0}")]
     Request(#[from] attohttpc::Error),
     #[error("Sere error{0}")]
@@ -31,6 +35,8 @@ impl Into<actix_web::http::StatusCode> for &Error
             Error::Json(_) => StatusCode::NOT_FOUND,
             Error::Elephantry(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotFound => StatusCode::NOT_FOUND,
+            Error::ParseFloat(_) => StatusCode::BAD_REQUEST,
+            Error::ParseInt(_) => StatusCode::BAD_REQUEST,
             Error::Request(_) => StatusCode::NOT_FOUND,
             Error::Serde(_) => StatusCode::NOT_FOUND,
             Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -44,6 +50,12 @@ impl actix_web::error::ResponseError for Error
     fn error_response(&self) -> actix_web::HttpResponse
     {
         let status: actix_web::http::StatusCode = self.into();
+
+        if status.is_client_error() {
+            log::warn!("{:?}", self);
+        } else if status.is_server_error() {
+            log::error!("{:?}", self);
+        }
 
         let file = format!("errors/{}.html", u16::from(status));
         let template = tera_hot::Template::new(crate::TEMPLATE_DIR);
