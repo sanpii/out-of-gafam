@@ -31,7 +31,7 @@ version = "0.16"
 features = ["json"]
 
 [dependencies.elephantry]
-version = "1.0"
+version = "2.0"
 features = ["uuid"]
 
 [dependencies.uuid]
