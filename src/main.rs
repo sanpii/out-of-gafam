@@ -41,14 +41,14 @@ async fn main() -> std::io::Result<()>
     let template = tera_hot::Template::new(TEMPLATE_DIR);
     template.clone().watch();
 
-    actix_web::HttpServer::new(move || {
-        let elephantry = elephantry::Pool::new(&database_url)
-            .expect("Unable to connect to postgresql");
+    let elephantry = elephantry::Pool::new(&database_url)
+        .expect("Unable to connect to postgresql");
 
+    actix_web::HttpServer::new(move || {
         let data = AppData {
+            elephantry: elephantry.clone(),
             template: template.clone(),
             sites: Sites::new(),
-            elephantry,
         };
         let static_files = actix_files::Files::new("/static", "static/");
 
