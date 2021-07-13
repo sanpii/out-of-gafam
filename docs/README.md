@@ -7,9 +7,9 @@ This project help you to evade from its prisons by allowing you to keep
 up to date about new contents without account, just with a good old RSS feed.
 
 
-[<img title="Home" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/home.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/home.png)
-[<img title="User page" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/page.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/page.png)
-[<img title="Feed" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/feed.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/master/screenshots/feed.png)
+[<img title="Home" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/home.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/home.png)
+[<img title="User page" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/page.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/page.png)
+[<img title="Feed" src="https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/feed.png" width="300px" />](https://raw.githubusercontent.com/sanpii/out-of-gafam/main/screenshots/feed.png)
 
 ## Compilation
 
