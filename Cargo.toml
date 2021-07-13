@@ -25,7 +25,7 @@ tera = "1.0"
 tera-hot = "0.3"
 thiserror = "1.0"
 url = "2.2"
-urlencoding = "1.0"
+urlencoding = "2.0"
 
 [dependencies.attohttpc]
 version = "0.17"

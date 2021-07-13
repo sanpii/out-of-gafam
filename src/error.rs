@@ -20,8 +20,8 @@ pub enum Error {
     Serde(#[from] serde_json::Error),
     #[error("Template error: {0}")]
     Template(#[from] tera::Error),
-    #[error("URL decoding error: {0}")]
-    Url(#[from] urlencoding::FromUrlEncodingError),
+    #[error("UTF8 decoding error: {0}")]
+    Utf8(#[from] std::string::FromUtf8Error),
 }
 
 impl Into<actix_web::http::StatusCode> for &Error
@@ -40,7 +40,7 @@ impl Into<actix_web::http::StatusCode> for &Error
             Error::Request(_) => StatusCode::NOT_FOUND,
             Error::Serde(_) => StatusCode::NOT_FOUND,
             Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Url(_) => StatusCode::NOT_FOUND,
+            Error::Utf8(_) => StatusCode::NOT_FOUND,
         }
     }
 }
