@@ -92,7 +92,7 @@ impl Custom
         Self::select(root, &selector)
             .iter()
             .map(|x| if let Some(attr) = &attr {
-                x.value().attr(&attr).unwrap_or_default().to_string()
+                x.value().attr(attr).unwrap_or_default().to_string()
             } else {
                 x.inner_html()
             })
@@ -109,7 +109,7 @@ impl Custom
             return vec![*root];
         }
 
-        match scraper::Selector::parse(&selector) {
+        match scraper::Selector::parse(selector) {
             Ok(selector) => root.select(&selector).collect(),
             Err(_) => Vec::new(),
         }

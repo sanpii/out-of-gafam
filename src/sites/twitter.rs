@@ -24,10 +24,7 @@ impl crate::sites::Site for Twitter
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)")
             .unwrap();
 
-        match re.captures(url) {
-            Some(caps) => Some(format!("@{}", caps["name"].to_string())),
-            None => None,
-        }
+        re.captures(url).map(|caps| format!("@{}", caps["name"].to_string()))
     }
 
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>

@@ -26,7 +26,7 @@ impl<'a> Model<'a> {
     pub fn find(&self, url: &str) -> elephantry::Result<Option<Entity>> {
         Ok(
             self.connection.find_where::<Self>("channel_link = $1", &[&url], None)?
-                .nth(0)
+                .next()
         )
     }
 }

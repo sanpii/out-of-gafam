@@ -32,7 +32,7 @@ impl crate::sites::Site for Youtube
         };
 
         if &king == "user" || &king == "channel" || &king == "c" {
-            let html = match self.fetch_html(&url) {
+            let html = match self.fetch_html(url) {
                 Ok(contents) => contents,
                 Err(_) => return None,
             };

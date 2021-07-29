@@ -39,17 +39,17 @@ pub trait Site {
 
     fn post_json(&self, url: &str, body: &str) -> crate::Result<json::JsonValue>
     {
-        self.json(attohttpc::Method::POST, &url, Some(body))
+        self.json(attohttpc::Method::POST, url, Some(body))
     }
 
     fn fetch_json(&self, url: &str) -> crate::Result<json::JsonValue>
     {
-        self.json(attohttpc::Method::GET, &url, None)
+        self.json(attohttpc::Method::GET, url, None)
     }
 
     fn fetch_html(&self, url: &str) -> crate::Result<scraper::html::Html>
     {
-        let contents = self.fetch(attohttpc::Method::GET, &url, None)?;
+        let contents = self.fetch(attohttpc::Method::GET, url, None)?;
         let html = scraper::Html::parse_document(&contents);
 
         Ok(html)
@@ -57,7 +57,7 @@ pub trait Site {
 
     fn json(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<json::JsonValue>
     {
-        let contents = self.fetch(method, &url, body)?;
+        let contents = self.fetch(method, url, body)?;
         let json = json::parse(&contents)?;
 
         Ok(json)
@@ -125,10 +125,7 @@ pub trait Site {
 
     fn select_first<'a>(&self, element: &'a scraper::ElementRef<'_>, selector: &'static str) -> Option<scraper::ElementRef<'a>>
     {
-        match self.select(element, selector).get(0) {
-            Some(e) => Some(*e),
-            None => None,
-        }
+        self.select(element, selector).get(0).copied()
     }
 
     fn select<'a>(&self, element: &'a scraper::ElementRef<'_>, selector: &'static str) -> Vec<scraper::ElementRef<'a>>
@@ -148,7 +145,7 @@ pub trait Site {
         let selector = selectors.get(selector)
             .unwrap();
 
-        element.select(&selector).collect()
+        element.select(selector).collect()
     }
 }
 

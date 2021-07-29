@@ -17,10 +17,7 @@ impl crate::sites::Site for Facebook
         let re = regex::Regex::new(r"https?://([^\.]+.)?facebook.com/(?P<name>(groups/)?[^/]+)")
             .unwrap();
 
-        match re.captures(url) {
-            Some(caps) => Some(caps["name"].to_string()),
-            None => None,
-        }
+        re.captures(url).map(|caps| caps["name"].to_string())
     }
 
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
@@ -93,7 +90,7 @@ impl Facebook
         let regex = regex::Regex::new(r#"href="(/[^"]+)""#)
             .unwrap();
 
-        let contents = regex.replace_all(&contents, r#"href="https://mobile.facebook.com$1""#)
+        let contents = regex.replace_all(contents, r#"href="https://mobile.facebook.com$1""#)
             .to_string();
 
         let regex = regex::Regex::new(r#"href="https://mobile\.facebook\.com/story\.php\?story_fbid=([^&]+)&amp;id=([^&]+)[^"]*"#)

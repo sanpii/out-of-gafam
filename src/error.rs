@@ -24,13 +24,13 @@ pub enum Error {
     Utf8(#[from] std::string::FromUtf8Error),
 }
 
-impl Into<actix_web::http::StatusCode> for &Error
+impl From<&Error> for actix_web::http::StatusCode
 {
-    fn into(self) -> actix_web::http::StatusCode
+    fn from(error: &Error) -> Self
     {
         use actix_web::http::StatusCode;
 
-        match self {
+        match error {
             Error::Io(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Json(_) => StatusCode::NOT_FOUND,
             Error::Elephantry(_) => StatusCode::INTERNAL_SERVER_ERROR,

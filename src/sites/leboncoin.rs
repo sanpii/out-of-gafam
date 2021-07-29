@@ -65,8 +65,8 @@ impl Leboncoin {
             match key.into_owned().as_str() {
                 "category" => filters["category"]["id"] = value.into_owned().into(),
                 "text" => filters["keywords"]["text"] = value.into_owned().into(),
-                "locations" => filters["location"]["locations"] = self.locations(value.into_owned().into())?,
-                "price" => filters["ranges"]["price"] = self.price(value.into_owned().into())?,
+                "locations" => filters["location"]["locations"] = self.locations(value.into_owned())?,
+                "price" => filters["ranges"]["price"] = self.price(value.into_owned())?,
                 k => log::warn!("Unsuported query filter: {}", k),
             }
         }
