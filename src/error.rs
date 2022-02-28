@@ -69,7 +69,7 @@ impl actix_web::error::ResponseError for Error
         };
 
         actix_web::HttpResponse::build(status)
-            .header(actix_web::http::header::CONTENT_TYPE, "text/html")
+            .append_header((actix_web::http::header::CONTENT_TYPE, "text/html"))
             .body(body)
     }
 }

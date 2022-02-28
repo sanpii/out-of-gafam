@@ -106,7 +106,7 @@ async fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Pa
     };
 
     let response = actix_web::HttpResponse::Found()
-        .header(actix_web::http::header::LOCATION, url)
+        .append_header((actix_web::http::header::LOCATION, url))
         .finish();
 
     Ok(response)
@@ -224,7 +224,7 @@ async fn save(request: actix_web::HttpRequest, site: actix_web::web::Query<site:
     };
 
     let response = actix_web::HttpResponse::Found()
-        .header(actix_web::http::header::LOCATION, url)
+        .append_header((actix_web::http::header::LOCATION, url))
         .finish();
 
     Ok(response)
