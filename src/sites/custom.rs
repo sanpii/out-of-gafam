@@ -64,7 +64,7 @@ impl Custom
 
         let user = crate::sites::User {
             url: url.to_string(),
-            id: data.id.map(|x| x.to_hyphenated().to_string()).unwrap_or_default(),
+            id: data.id.map(|x| x.as_hyphenated().to_string()).unwrap_or_default(),
             description: Self::get_one(&root, data.channel_description.as_ref()),
             name: Self::get_one(&root, Some(&data.channel_title)).unwrap_or_default(),
             image: Self::get_one(&root, data.channel_image.as_ref()),

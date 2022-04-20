@@ -96,7 +96,7 @@ async fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Pa
         {
             Some(site) => format!(
                 "/user/custom/{}",
-                site.id.unwrap().to_hyphenated().to_string()
+                site.id.unwrap().as_hyphenated().to_string()
             ),
             None => format!(
                 "/preview?channel_link={}",
