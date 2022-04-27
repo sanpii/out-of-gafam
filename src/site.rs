@@ -22,7 +22,7 @@ pub struct Entity {
     pub item_guid: Option<String>,
 }
 
-impl<'a> Model<'a> {
+impl Model {
     pub fn find(&self, url: &str) -> elephantry::Result<Option<Entity>> {
         Ok(
             self.connection.find_where::<Self>("channel_link = $1", &[&url], None)?

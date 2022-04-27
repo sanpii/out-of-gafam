@@ -28,7 +28,7 @@ impl crate::sites::Site for Custom
     fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
     {
         let uuid = uuid::Uuid::parse_str(id).unwrap();
-        let entity = match elephantry.find_by_pk::<crate::site::Model<'_>>(&elephantry::pk! {
+        let entity = match elephantry.find_by_pk::<crate::site::Model>(&elephantry::pk! {
             id => uuid,
         })? {
             Some(entity) => entity,

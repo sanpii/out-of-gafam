@@ -91,7 +91,7 @@ async fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Pa
         format!("/user/{}/{}", name, id)
     } else {
         match data.elephantry
-            .model::<crate::site::Model<'_>>()
+            .model::<crate::site::Model>()
             .find(&params.account)?
         {
             Some(site) => format!(
@@ -208,10 +208,10 @@ async fn save(request: actix_web::HttpRequest, site: actix_web::web::Query<site:
     let data: &AppData = request.app_data()
         .unwrap();
 
-    let site = match data.elephantry.insert_one::<site::Model<'_>>(&*site) {
+    let site = match data.elephantry.insert_one::<site::Model>(&*site) {
         Ok(site) => site,
-        Err(elephantry::Error::Sql(err)) => if err.state() == Some(elephantry::pq::state::UNIQUE_VIOLATION) {
-            data.elephantry.model::<site::Model<'_>>().find(&site.channel_link)?.unwrap()
+        Err(elephantry::Error::Sql(err)) => if err.state()? == Some(elephantry::pq::state::UNIQUE_VIOLATION) {
+            data.elephantry.model::<site::Model>().find(&site.channel_link)?.unwrap()
         } else {
             return Err(elephantry::Error::Sql(err).into());
         },
