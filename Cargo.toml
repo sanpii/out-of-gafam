@@ -27,7 +27,7 @@ url = "2.2"
 urlencoding = "2.0"
 
 [dependencies.attohttpc]
-version = "0.19"
+version = "0.22"
 features = ["json"]
 
 [dependencies.elephantry]
