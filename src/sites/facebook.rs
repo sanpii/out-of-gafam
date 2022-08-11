@@ -1,13 +1,5 @@
+#[derive(Default)]
 pub struct Facebook {
-}
-
-impl Default for Facebook
-{
-    fn default() -> Self
-    {
-        Self {
-        }
-    }
 }
 
 impl crate::sites::Site for Facebook
@@ -102,7 +94,7 @@ impl Facebook
 
     fn rewrite_url(&self, contents: &str) -> String
     {
-        contents.replace("/", "https://mobile.facebook.com/")
+        contents.replace('/', "https://mobile.facebook.com/")
     }
 
     fn parse_date(text: &str) -> String

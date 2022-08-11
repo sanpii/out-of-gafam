@@ -1,13 +1,5 @@
+#[derive(Default)]
 pub struct Twitter {
-}
-
-impl Default for Twitter
-{
-    fn default() -> Self
-    {
-        Self {
-        }
-    }
 }
 
 impl crate::sites::Site for Twitter
@@ -24,7 +16,7 @@ impl crate::sites::Site for Twitter
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)")
             .unwrap();
 
-        re.captures(url).map(|caps| format!("@{}", caps["name"].to_string()))
+        re.captures(url).map(|caps| format!("@{}", &caps["name"]))
     }
 
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>

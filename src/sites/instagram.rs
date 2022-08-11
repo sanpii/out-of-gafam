@@ -1,3 +1,4 @@
+#[derive(Default)]
 pub struct Instagram {
 }
 
@@ -6,15 +7,6 @@ impl std::fmt::Display for Instagram
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error>
     {
         write!(f, "instagram")
-    }
-}
-
-impl Default for Instagram
-{
-    fn default() -> Self
-    {
-        Self {
-        }
     }
 }
 
@@ -44,7 +36,7 @@ impl crate::sites::Site for Instagram
 
         for edge in json["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"].members() {
             let caption = match &edge["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
-                json::JsonValue::String(caption) => caption.replace("\n", "<br />"),
+                json::JsonValue::String(caption) => caption.replace('\n', "<br />"),
                 _ => String::new(),
             };
             let thumbnail = &edge["node"]["thumbnail_src"];

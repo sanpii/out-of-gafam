@@ -1,3 +1,4 @@
+#[derive(Default)]
 pub struct Custom {
 }
 
@@ -6,15 +7,6 @@ impl std::fmt::Display for Custom
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error>
     {
         write!(f, "custom")
-    }
-}
-
-impl Default for Custom
-{
-    fn default() -> Self
-    {
-        Self {
-        }
     }
 }
 
