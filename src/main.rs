@@ -208,7 +208,7 @@ async fn save(request: actix_web::HttpRequest, site: actix_web::web::Query<site:
     let data: &AppData = request.app_data()
         .unwrap();
 
-    let site = match data.elephantry.insert_one::<site::Model>(&*site) {
+    let site = match data.elephantry.insert_one::<site::Model>(&site) {
         Ok(site) => site,
         Err(elephantry::Error::Sql(err)) => if err.state()? == Some(elephantry::pq::state::UNIQUE_VIOLATION) {
             data.elephantry.model::<site::Model>().find(&site.channel_link)?.unwrap()
