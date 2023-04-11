@@ -30,16 +30,18 @@ impl super::Site for Leboncoin
             posts: vec![],
         };
 
-        for ad in json["ads"].members() {
-            let post = crate::sites::Post {
-                created_time: ad["index_date"].to_string(),
-                url: ad["url"].to_string(),
-                id: ad["list_id"].to_string(),
-                message: ad["body"].to_string(),
-                name: ad["subject"].to_string(),
-            };
+        if let serde_json::Value::Array(ads) = &json["ads"] {
+            for ad in ads {
+                let post = crate::sites::Post {
+                    created_time: ad["index_date"].to_string(),
+                    url: ad["url"].to_string(),
+                    id: ad["list_id"].to_string(),
+                    message: ad["body"].to_string(),
+                    name: ad["subject"].to_string(),
+                };
 
-            user.posts.push(post);
+                user.posts.push(post);
+            }
         }
 
         Ok(user)
@@ -47,17 +49,17 @@ impl super::Site for Leboncoin
 }
 
 impl Leboncoin {
-    fn query(&self, params: &str) -> crate::error::Result<json::JsonValue> {
-        let mut body = json::object! {
-            "limit" : 35,
+    fn query(&self, params: &str) -> crate::error::Result<serde_json::Value> {
+        let mut body = serde_json::json!({
+            "limit": 35,
             "limit_alu": 3,
-            "filters" : {
+            "filters": {
                 "location": {
                 },
                 "category" : {
                 }
             }
-        };
+        });
 
         let filters = &mut body["filters"];
 
@@ -74,7 +76,7 @@ impl Leboncoin {
         Ok(body)
     }
 
-    fn locations(&self, param: String) -> crate::error::Result<json::JsonValue> {
+    fn locations(&self, param: String) -> crate::error::Result<serde_json::Value> {
         let mut locations = Vec::new();
 
         for l in param.split(',') {
@@ -84,7 +86,7 @@ impl Leboncoin {
         Ok(locations.into())
     }
 
-    fn location(&self, param: &str) -> crate::error::Result<json::JsonValue> {
+    fn location(&self, param: &str) -> crate::error::Result<serde_json::Value> {
         let tokens = param.split('_')
             .collect::<Vec<_>>();
 
@@ -94,7 +96,7 @@ impl Leboncoin {
         let default_radius: u32 = tokens[4].parse()?;
         let radius: u32 = tokens.get(5).unwrap_or(&"50000").parse()?;
 
-        let json = json::object! {
+        let json = serde_json::json!({
             "area": {
                 "default_radius": default_radius,
                 "lat": lat,
@@ -103,16 +105,16 @@ impl Leboncoin {
             },
             "city": city,
             "locationType": "city"
-        };
+        });
 
         Ok(json)
     }
 
-    fn price(&self, param: String) -> crate::error::Result<json::JsonValue> {
+    fn price(&self, param: String) -> crate::error::Result<serde_json::Value> {
         let tokens = param.split('-')
             .collect::<Vec<_>>();
 
-        let mut object = json::object::Object::new();
+        let mut object = serde_json::json!({});
 
         if tokens[0] != "min" {
             let min: f32 = tokens[0].parse()?;

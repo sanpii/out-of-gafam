@@ -37,12 +37,12 @@ pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
     fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<self::User>;
 
-    fn post_json(&self, url: &str, body: &str) -> crate::Result<json::JsonValue>
+    fn post_json(&self, url: &str, body: &str) -> crate::Result<serde_json::Value>
     {
         self.json(attohttpc::Method::POST, url, Some(body))
     }
 
-    fn fetch_json(&self, url: &str) -> crate::Result<json::JsonValue>
+    fn fetch_json(&self, url: &str) -> crate::Result<serde_json::Value>
     {
         self.json(attohttpc::Method::GET, url, None)
     }
@@ -55,10 +55,10 @@ pub trait Site {
         Ok(html)
     }
 
-    fn json(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<json::JsonValue>
+    fn json(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<serde_json::Value>
     {
         let contents = self.fetch(method, url, body)?;
-        let json = json::parse(&contents)?;
+        let json = serde_json::from_str(&contents)?;
 
         Ok(json)
     }

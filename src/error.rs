@@ -4,8 +4,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
-    #[error("Invalid json response: {0}")]
-    Json(#[from] json::JsonError),
     #[error("Database error: {0}")]
     Elephantry(#[from] elephantry::Error),
     #[error("Not found")]
@@ -32,7 +30,6 @@ impl From<&Error> for actix_web::http::StatusCode
 
         match error {
             Error::Io(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Json(_) => StatusCode::NOT_FOUND,
             Error::Elephantry(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotFound => StatusCode::NOT_FOUND,
             Error::ParseFloat(_) => StatusCode::BAD_REQUEST,

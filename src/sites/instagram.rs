@@ -34,25 +34,27 @@ impl crate::sites::Site for Instagram
             posts: vec![],
         };
 
-        for edge in json["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"].members() {
-            let caption = match &edge["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
-                json::JsonValue::String(caption) => caption.replace('\n', "<br />"),
-                _ => String::new(),
-            };
-            let thumbnail = &edge["node"]["thumbnail_src"];
-            let id = edge["node"]["shortcode"].to_string();
+        if let serde_json::Value::Array(edges) = &json["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"] {
+            for edge in edges {
+                let caption = match &edge["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
+                    serde_json::Value::String(caption) => caption.replace('\n', "<br />"),
+                    _ => String::new(),
+                };
+                let thumbnail = &edge["node"]["thumbnail_src"];
+                let id = edge["node"]["shortcode"].to_string();
 
-            let message = format!("{}<br /><img src=\"{}\" />", caption, thumbnail);
+                let message = format!("{}<br /><img src=\"{}\" />", caption, thumbnail);
 
-            let post = crate::sites::Post {
-                name: "Post".to_string(),
-                url: format!("https://www.instagram.com/p/{}", id),
-                message,
-                created_time: Self::parse_date(&edge["node"]["taken_at_timestamp"].to_string()),
-                id,
-            };
+                let post = crate::sites::Post {
+                    name: "Post".to_string(),
+                    url: format!("https://www.instagram.com/p/{}", id),
+                    message,
+                    created_time: Self::parse_date(&edge["node"]["taken_at_timestamp"].to_string()),
+                    id,
+                };
 
-            user.posts.push(post);
+                user.posts.push(post);
+            }
         }
 
         Ok(user)
