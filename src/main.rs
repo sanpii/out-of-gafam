@@ -25,7 +25,7 @@ static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 async fn main() -> std::io::Result<()>
 {
     #[cfg(debug_assertions)]
-    dotenv::dotenv()
+    dotenvy::dotenv()
         .ok();
 
     env_logger::init();
