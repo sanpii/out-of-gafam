@@ -127,6 +127,6 @@ impl Leboncoin {
             object["max"] = max.into();
         }
 
-        Ok(object.into())
+        Ok(object)
     }
 }

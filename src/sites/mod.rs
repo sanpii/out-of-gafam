@@ -157,12 +157,12 @@ pub struct Sites {
 impl Sites {
     pub fn new() -> Self {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
-        sites.insert("facebook", Box::new(Facebook::default()));
-        sites.insert("leboncoin", Box::new(Leboncoin::default()));
-        sites.insert("instagram", Box::new(Instagram::default()));
-        sites.insert("twitter", Box::new(Twitter::default()));
-        sites.insert("youtube", Box::new(Youtube::default()));
-        sites.insert("custom", Box::new(Custom::default()));
+        sites.insert("facebook", Box::<Facebook>::default());
+        sites.insert("leboncoin", Box::<Leboncoin>::default());
+        sites.insert("instagram", Box::<Instagram>::default());
+        sites.insert("twitter", Box::<Twitter>::default());
+        sites.insert("youtube", Box::<Youtube>::default());
+        sites.insert("custom", Box::<Custom>::default());
 
         Self { sites }
     }

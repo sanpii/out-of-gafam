@@ -160,7 +160,7 @@ async fn iframe(
 ) -> Result<actix_web::HttpResponse> {
     let url = query.get("url").unwrap();
 
-    let body = attohttpc::get(&urlencoding::decode(url)?)
+    let body = attohttpc::get(urlencoding::decode(url)?)
         .header("User-Agent", "Mozilla")
         .header("Accept-Language", "en-US")
         .send()?;

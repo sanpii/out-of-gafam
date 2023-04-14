@@ -71,7 +71,7 @@ impl Custom {
         Ok(user)
     }
 
-    fn get_one<'a>(root: &'a scraper::ElementRef<'_>, selector: Option<&String>) -> Option<String> {
+    fn get_one(root: &scraper::ElementRef<'_>, selector: Option<&String>) -> Option<String> {
         if let Some(selector) = selector {
             Self::get_all(root, selector).get(0).cloned()
         } else {
@@ -79,7 +79,7 @@ impl Custom {
         }
     }
 
-    fn get_all<'a>(root: &'a scraper::ElementRef<'_>, selector: &str) -> Vec<String> {
+    fn get_all(root: &scraper::ElementRef<'_>, selector: &str) -> Vec<String> {
         let (selector, attr) = Self::parse_selector(selector);
 
         Self::select(root, &selector)
