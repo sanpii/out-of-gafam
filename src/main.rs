@@ -22,7 +22,7 @@ struct Params {
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 #[actix_web::main]
-async fn main() -> Result<()>
+async fn main() -> Result
 {
     #[cfg(debug_assertions)]
     envir::dotenv();
