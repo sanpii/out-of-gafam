@@ -1,12 +1,10 @@
 #[derive(Default)]
 pub struct Leboncoin;
 
-impl super::Site for Leboncoin
-{
-    fn id(&self, url: &str) -> Option<String>
-    {
-        let re = regex::Regex::new(r"https?://www\.leboncoin\.fr/recherche/?(?P<param>\?.*)")
-            .unwrap();
+impl super::Site for Leboncoin {
+    fn id(&self, url: &str) -> Option<String> {
+        let re =
+            regex::Regex::new(r"https?://www\.leboncoin\.fr/recherche/?(?P<param>\?.*)").unwrap();
 
         let param = match re.captures(url) {
             Some(caps) => caps["param"].to_string(),
@@ -16,8 +14,12 @@ impl super::Site for Leboncoin
         Some(param)
     }
 
-    fn user(&self, _: &elephantry::Pool, _: &str, params: &str) -> crate::error::Result<super::User>
-    {
+    fn user(
+        &self,
+        _: &elephantry::Pool,
+        _: &str,
+        params: &str,
+    ) -> crate::error::Result<super::User> {
         let body = self.query(params)?;
         let json = self.post_json("https://api.leboncoin.fr/finder/search", &body.to_string())?;
 
@@ -67,7 +69,9 @@ impl Leboncoin {
             match key.into_owned().as_str() {
                 "category" => filters["category"]["id"] = value.into_owned().into(),
                 "text" => filters["keywords"]["text"] = value.into_owned().into(),
-                "locations" => filters["location"]["locations"] = self.locations(value.into_owned())?,
+                "locations" => {
+                    filters["location"]["locations"] = self.locations(value.into_owned())?
+                }
                 "price" => filters["ranges"]["price"] = self.price(value.into_owned())?,
                 k => log::warn!("Unsuported query filter: {}", k),
             }
@@ -87,8 +91,7 @@ impl Leboncoin {
     }
 
     fn location(&self, param: &str) -> crate::error::Result<serde_json::Value> {
-        let tokens = param.split('_')
-            .collect::<Vec<_>>();
+        let tokens = param.split('_').collect::<Vec<_>>();
 
         let city = tokens[0];
         let lat: f32 = tokens[2].parse()?;
@@ -111,8 +114,7 @@ impl Leboncoin {
     }
 
     fn price(&self, param: String) -> crate::error::Result<serde_json::Value> {
-        let tokens = param.split('-')
-            .collect::<Vec<_>>();
+        let tokens = param.split('-').collect::<Vec<_>>();
 
         let mut object = serde_json::json!({});
 

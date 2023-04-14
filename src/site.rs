@@ -24,9 +24,9 @@ pub struct Entity {
 
 impl Model {
     pub fn find(&self, url: &str) -> elephantry::Result<Option<Entity>> {
-        Ok(
-            self.connection.find_where::<Self>("channel_link = $1", &[&url], None)?
-                .next()
-        )
+        Ok(self
+            .connection
+            .find_where::<Self>("channel_link = $1", &[&url], None)?
+            .next())
     }
 }

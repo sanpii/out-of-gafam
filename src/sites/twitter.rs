@@ -1,11 +1,8 @@
 #[derive(Default)]
-pub struct Twitter {
-}
+pub struct Twitter {}
 
-impl crate::sites::Site for Twitter
-{
-    fn id(&self, url: &str) -> Option<String>
-    {
+impl crate::sites::Site for Twitter {
+    fn id(&self, url: &str) -> Option<String> {
         let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/search\?q=(?P<search>[^&]+)")
             .unwrap();
 
@@ -13,21 +10,18 @@ impl crate::sites::Site for Twitter
             return Some(caps["search"].to_string());
         }
 
-        let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)")
-            .unwrap();
+        let re = regex::Regex::new(r"https?://([^\.]+.)?twitter.com/(?P<name>[^/]+)").unwrap();
 
         re.captures(url).map(|caps| format!("@{}", &caps["name"]))
     }
 
-    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
-    {
+    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
         let (url, gafam_url) = if id.starts_with('@') {
             (
                 format!("https://mobile.twitter.com/{}", id),
                 format!("https://twitter.com/{}", id),
             )
-        }
-        else {
+        } else {
             let id = urlencoding::encode(id);
 
             (
@@ -41,8 +35,7 @@ impl crate::sites::Site for Twitter
 
         let mut user = crate::sites::User {
             id: id.to_string(),
-            name: self.og(&html, "title")
-                .unwrap_or_else(|_| id.to_string()),
+            name: self.og(&html, "title").unwrap_or_else(|_| id.to_string()),
             description: None,
             url: gafam_url,
             image: if id.starts_with('@') {
@@ -58,7 +51,10 @@ impl crate::sites::Site for Twitter
             let name = format!("tweet de {}", id);
 
             let (id, message) = match self.select_first(&element, ".tweet-text") {
-                Some(e) => (e.value().attr("data-id").unwrap().to_string(), e.inner_html()),
+                Some(e) => (
+                    e.value().attr("data-id").unwrap().to_string(),
+                    e.inner_html(),
+                ),
                 None => continue,
             };
 
@@ -87,14 +83,12 @@ impl crate::sites::Site for Twitter
     }
 }
 
-impl Twitter
-{
-    fn parse_date(text: &str) -> String
-    {
+impl Twitter {
+    fn parse_date(text: &str) -> String {
         match chrono_english::parse_date_string(
             text,
             chrono::Local::now(),
-            chrono_english::Dialect::Uk
+            chrono_english::Dialect::Uk,
         ) {
             Ok(date) => date.to_string(),
             Err(_) => text.to_string(),

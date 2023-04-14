@@ -2,10 +2,8 @@ pub struct Youtube {
     invidious: String,
 }
 
-impl std::fmt::Display for Youtube
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error>
-    {
+impl std::fmt::Display for Youtube {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "youtube")
     }
 }
@@ -13,16 +11,13 @@ impl std::fmt::Display for Youtube
 impl Default for Youtube {
     fn default() -> Self {
         Self {
-            invidious: envir::get("INVIDIOUS")
-                .unwrap_or_else(|_| "https://invidio.us".to_string()),
+            invidious: envir::get("INVIDIOUS").unwrap_or_else(|_| "https://invidio.us".to_string()),
         }
     }
 }
 
-impl crate::sites::Site for Youtube
-{
-    fn id(&self, url: &str) -> Option<String>
-    {
+impl crate::sites::Site for Youtube {
+    fn id(&self, url: &str) -> Option<String> {
         let re = regex::Regex::new(r"https?://([^\.]+.)?youtube.com/(?P<king>c(hannel)?|user|playlist)(/|\?list=)(?P<name>[^/]+)")
             .unwrap();
 
@@ -51,12 +46,13 @@ impl crate::sites::Site for Youtube
         Some(name)
     }
 
-    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
-    {
+    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
         let feed_url = if id.starts_with("PL") {
-            format!("https://www.youtube.com/feeds/videos.xml?playlist_id={}", id)
-        }
-        else {
+            format!(
+                "https://www.youtube.com/feeds/videos.xml?playlist_id={}",
+                id
+            )
+        } else {
             format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id)
         };
         let html = self.fetch_html(&feed_url)?;
@@ -92,10 +88,10 @@ impl crate::sites::Site for Youtube
                 None => Default::default(),
             };
 
-
             let url = format!("https://www.youtube.com/watch?v={}", id);
 
-            let message = format!(r#"<iframe
+            let message = format!(
+                r#"<iframe
         width="560"
         height="315"
         src="{}/embed/{}"

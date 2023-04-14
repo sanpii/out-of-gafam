@@ -1,8 +1,8 @@
 #![warn(rust_2018_idioms)]
 
 mod error;
-mod sites;
 mod site;
+mod sites;
 
 use error::Error;
 use error::Result;
@@ -22,8 +22,7 @@ struct Params {
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 #[actix_web::main]
-async fn main() -> Result
-{
+async fn main() -> Result {
     #[cfg(debug_assertions)]
     envir::dotenv();
 
@@ -37,8 +36,7 @@ async fn main() -> Result
     let template = tera_hot::Template::new(TEMPLATE_DIR);
     template.clone().watch();
 
-    let elephantry = elephantry::Pool::new(&database_url)
-        .expect("Unable to connect to postgresql");
+    let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
     actix_web::HttpServer::new(move || {
         let data = AppData {
@@ -67,10 +65,8 @@ async fn main() -> Result
     Ok(())
 }
 
-async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
-{
-    let data: &AppData = request.app_data()
-        .unwrap();
+async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
+    let data: &AppData = request.app_data().unwrap();
     let body = data.template.render("index.html", &tera::Context::new())?;
 
     let response = actix_web::HttpResponse::Ok()
@@ -80,22 +76,21 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     Ok(response)
 }
 
-async fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Params>) -> Result<actix_web::HttpResponse>
-{
-    let data: &AppData = request.app_data()
-        .unwrap();
+async fn search(
+    request: actix_web::HttpRequest,
+    params: actix_web::web::Form<Params>,
+) -> Result<actix_web::HttpResponse> {
+    let data: &AppData = request.app_data().unwrap();
 
     let url = if let Some((name, id)) = data.sites.find(&params.account) {
         format!("/user/{}/{}", name, id)
     } else {
-        match data.elephantry
+        match data
+            .elephantry
             .model::<crate::site::Model>()
             .find(&params.account)?
         {
-            Some(site) => format!(
-                "/user/custom/{}",
-                site.id.unwrap().as_hyphenated()
-            ),
+            Some(site) => format!("/user/custom/{}", site.id.unwrap().as_hyphenated()),
             None => format!(
                 "/preview?channel_link={}",
                 urlencoding::encode(&params.account)
@@ -110,8 +105,7 @@ async fn search(request: actix_web::HttpRequest, params: actix_web::web::Form<Pa
     Ok(response)
 }
 
-async fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
-{
+async fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
     let body = body(&request, "user.html")?;
 
     let response = actix_web::HttpResponse::Ok()
@@ -121,8 +115,7 @@ async fn user(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse
     Ok(response)
 }
 
-async fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
-{
+async fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
     let body = body(&request, "rss.xml")?;
 
     let response = actix_web::HttpResponse::Ok()
@@ -132,13 +125,11 @@ async fn feed(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse
     Ok(response)
 }
 
-fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
-{
+fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String> {
     let site = &request.match_info()["site"];
     let name = &request.match_info()["name"];
     let params = request.query_string();
-    let data: &AppData = request.app_data()
-        .unwrap();
+    let data: &AppData = request.app_data().unwrap();
 
     let user = data.sites.user(&data.elephantry, site, name, params)?;
 
@@ -153,10 +144,8 @@ fn body(request: &actix_web::HttpRequest, template: &str) -> Result<String>
     }
 }
 
-async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>
-{
-    let data: &AppData = request.app_data()
-        .unwrap();
+async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
+    let data: &AppData = request.app_data().unwrap();
     let body = data.template.render("about.html", &tera::Context::new())?;
 
     let response = actix_web::HttpResponse::Ok()
@@ -166,8 +155,9 @@ async fn about(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     Ok(response)
 }
 
-async fn iframe(query: actix_web::web::Query<std::collections::HashMap<String, String>>) -> Result<actix_web::HttpResponse>
-{
+async fn iframe(
+    query: actix_web::web::Query<std::collections::HashMap<String, String>>,
+) -> Result<actix_web::HttpResponse> {
     let url = query.get("url").unwrap();
 
     let body = attohttpc::get(&urlencoding::decode(url)?)
@@ -182,10 +172,11 @@ async fn iframe(query: actix_web::web::Query<std::collections::HashMap<String, S
     Ok(response)
 }
 
-async fn preview(request: actix_web::HttpRequest, site: actix_web::web::Query<site::Entity>) -> Result<actix_web::HttpResponse>
-{
-    let data: &AppData = request.app_data()
-        .unwrap();
+async fn preview(
+    request: actix_web::HttpRequest,
+    site: actix_web::web::Query<site::Entity>,
+) -> Result<actix_web::HttpResponse> {
+    let data: &AppData = request.app_data().unwrap();
 
     let mut context = tera::Context::new();
     context.insert("data", &*site);
@@ -201,18 +192,24 @@ async fn preview(request: actix_web::HttpRequest, site: actix_web::web::Query<si
     Ok(response)
 }
 
-async fn save(request: actix_web::HttpRequest, site: actix_web::web::Query<site::Entity>) -> Result<actix_web::HttpResponse>
-{
-    let data: &AppData = request.app_data()
-        .unwrap();
+async fn save(
+    request: actix_web::HttpRequest,
+    site: actix_web::web::Query<site::Entity>,
+) -> Result<actix_web::HttpResponse> {
+    let data: &AppData = request.app_data().unwrap();
 
     let site = match data.elephantry.insert_one::<site::Model>(&site) {
         Ok(site) => site,
-        Err(elephantry::Error::Sql(err)) => if err.state()? == Some(elephantry::pq::state::UNIQUE_VIOLATION) {
-            data.elephantry.model::<site::Model>().find(&site.channel_link)?.unwrap()
-        } else {
-            return Err(elephantry::Error::Sql(err).into());
-        },
+        Err(elephantry::Error::Sql(err)) => {
+            if err.state()? == Some(elephantry::pq::state::UNIQUE_VIOLATION) {
+                data.elephantry
+                    .model::<site::Model>()
+                    .find(&site.channel_link)?
+                    .unwrap()
+            } else {
+                return Err(elephantry::Error::Sql(err).into());
+            }
+        }
         Err(err) => return Err(err.into()),
     };
 

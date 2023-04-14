@@ -1,27 +1,20 @@
 #[derive(Default)]
-pub struct Instagram {
-}
+pub struct Instagram {}
 
-impl std::fmt::Display for Instagram
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error>
-    {
+impl std::fmt::Display for Instagram {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "instagram")
     }
 }
 
-impl crate::sites::Site for Instagram
-{
-    fn id(&self, url: &str) -> Option<String>
-    {
-        let re = regex::Regex::new(r"https?://([^\.]+.)?instagram.com/(?P<name>[^/]+)")
-            .unwrap();
+impl crate::sites::Site for Instagram {
+    fn id(&self, url: &str) -> Option<String> {
+        let re = regex::Regex::new(r"https?://([^\.]+.)?instagram.com/(?P<name>[^/]+)").unwrap();
 
         re.captures(url).map(|caps| caps["name"].to_string())
     }
 
-    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User>
-    {
+    fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
         let url = format!("https://www.instagram.com/{}/?__a=1", id);
         let json = self.fetch_json(&url)?;
 
@@ -34,12 +27,15 @@ impl crate::sites::Site for Instagram
             posts: vec![],
         };
 
-        if let serde_json::Value::Array(edges) = &json["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"] {
+        if let serde_json::Value::Array(edges) =
+            &json["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"]
+        {
             for edge in edges {
-                let caption = match &edge["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
-                    serde_json::Value::String(caption) => caption.replace('\n', "<br />"),
-                    _ => String::new(),
-                };
+                let caption =
+                    match &edge["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] {
+                        serde_json::Value::String(caption) => caption.replace('\n', "<br />"),
+                        _ => String::new(),
+                    };
                 let thumbnail = &edge["node"]["thumbnail_src"];
                 let id = edge["node"]["shortcode"].to_string();
 
@@ -61,10 +57,8 @@ impl crate::sites::Site for Instagram
     }
 }
 
-impl Instagram
-{
-    fn parse_date(text: &str) -> String
-    {
+impl Instagram {
+    fn parse_date(text: &str) -> String {
         match chrono::NaiveDateTime::parse_from_str(text, "%s") {
             Ok(date) => date.to_string(),
             Err(_) => text.to_string(),

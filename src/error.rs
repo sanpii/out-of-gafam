@@ -24,10 +24,8 @@ pub enum Error {
     Utf8(#[from] std::string::FromUtf8Error),
 }
 
-impl From<&Error> for actix_web::http::StatusCode
-{
-    fn from(error: &Error) -> Self
-    {
+impl From<&Error> for actix_web::http::StatusCode {
+    fn from(error: &Error) -> Self {
         use actix_web::http::StatusCode;
 
         match error {
@@ -45,10 +43,8 @@ impl From<&Error> for actix_web::http::StatusCode
     }
 }
 
-impl actix_web::error::ResponseError for Error
-{
-    fn error_response(&self) -> actix_web::HttpResponse
-    {
+impl actix_web::error::ResponseError for Error {
+    fn error_response(&self) -> actix_web::HttpResponse {
         let status: actix_web::http::StatusCode = self.into();
 
         if status.is_client_error() {
