@@ -22,20 +22,16 @@ struct Params {
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()>
+async fn main() -> Result<()>
 {
     #[cfg(debug_assertions)]
-    dotenvy::dotenv()
-        .ok();
+    envir::dotenv();
 
     env_logger::init();
 
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("Missing DATABASE_URL env variable");
-    let ip = std::env::var("LISTEN_IP")
-        .expect("Missing LISTEN_IP env variable");
-    let port = std::env::var("LISTEN_PORT")
-        .expect("Missing LISTEN_IP env variable");
+    let database_url = envir::get("DATABASE_URL")?;
+    let ip = envir::get("LISTEN_IP")?;
+    let port = envir::get("LISTEN_PORT")?;
     let bind = format!("{}:{}", ip, port);
 
     let template = tera_hot::Template::new(TEMPLATE_DIR);
@@ -66,7 +62,9 @@ async fn main() -> std::io::Result<()>
     })
     .bind(&bind)?
     .run()
-    .await
+    .await?;
+
+    Ok(())
 }
 
 async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse>

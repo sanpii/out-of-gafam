@@ -65,15 +65,8 @@ pub trait Site {
 
     fn fetch(&self, method: attohttpc::Method, url: &str, body: Option<&str>) -> crate::Result<String>
     {
-        let http_proxy = std::env::var("http_proxy")
-            .map(|x| url::Url::parse(&x).ok())
-            .ok()
-            .flatten();
-
-        let https_proxy = std::env::var("https_proxy")
-            .map(|x| url::Url::parse(&x).ok())
-            .ok()
-            .flatten();
+        let http_proxy = envir::try_parse("http_proxy")?;
+        let https_proxy = envir::try_parse("https_proxy")?;
 
         let settings = attohttpc::ProxySettingsBuilder::new()
             .http_proxy(http_proxy)

@@ -13,7 +13,7 @@ impl std::fmt::Display for Youtube
 impl Default for Youtube {
     fn default() -> Self {
         Self {
-            invidious: std::env::var("INVIDIOUS")
+            invidious: envir::get("INVIDIOUS")
                 .unwrap_or_else(|_| "https://invidio.us".to_string()),
         }
     }
