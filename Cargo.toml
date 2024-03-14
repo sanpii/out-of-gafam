@@ -30,7 +30,7 @@ version = "0.26"
 features = ["json"]
 
 [dependencies.elephantry]
-version = "3.0"
+version = "4.0"
 features = ["uuid"]
 
 [dependencies.serde]
