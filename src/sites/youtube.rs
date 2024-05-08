@@ -49,11 +49,10 @@ impl crate::sites::Site for Youtube {
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
         let feed_url = if id.starts_with("PL") {
             format!(
-                "https://www.youtube.com/feeds/videos.xml?playlist_id={}",
-                id
+                "https://www.youtube.com/feeds/videos.xml?playlist_id={id}",
             )
         } else {
-            format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", id)
+            format!("https://www.youtube.com/feeds/videos.xml?channel_id={id}")
         };
         let html = self.fetch_html(&feed_url)?;
         let root = html.root_element();
@@ -67,7 +66,7 @@ impl crate::sites::Site for Youtube {
             id: id.to_string(),
             name,
             description: None,
-            url: format!("https://www.youtube.com/channel/{}", id),
+            url: format!("https://www.youtube.com/channel/{id}"),
             image: None,
             posts: vec![],
         };
@@ -88,17 +87,17 @@ impl crate::sites::Site for Youtube {
                 None => Default::default(),
             };
 
-            let url = format!("https://www.youtube.com/watch?v={}", id);
+            let url = format!("https://www.youtube.com/watch?v={id}");
 
             let message = format!(
                 r#"<iframe
         width="560"
         height="315"
-        src="{}/embed/{}"
+        src="{}/embed/{id}"
         frameborder="0"
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
         ></iframe>"#,
-                self.invidious, id,
+                self.invidious,
             );
 
             let post = crate::sites::Post {

@@ -31,7 +31,7 @@ async fn main() -> Result {
     let database_url = envir::get("DATABASE_URL")?;
     let ip = envir::get("LISTEN_IP")?;
     let port = envir::get("LISTEN_PORT")?;
-    let bind = format!("{}:{}", ip, port);
+    let bind = format!("{ip}:{port}");
 
     let template = tera_hot::Template::new(TEMPLATE_DIR);
     template.clone().watch();
@@ -83,7 +83,7 @@ async fn search(
     let data: &AppData = request.app_data().unwrap();
 
     let url = if let Some((name, id)) = data.sites.find(&params.account) {
-        format!("/user/{}/{}", name, id)
+        format!("/user/{name}/{id}")
     } else {
         match data
             .elephantry
@@ -214,7 +214,7 @@ async fn save(
     };
 
     let url = match site.id {
-        Some(id) => format!("/user/custom/{}", id),
+        Some(id) => format!("/user/custom/{id}"),
         None => return Err(Error::NotFound),
     };
 

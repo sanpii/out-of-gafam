@@ -10,7 +10,7 @@ impl crate::sites::Site for Facebook {
     }
 
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
-        let url = format!("https://mobile.facebook.com/{}", id);
+        let url = format!("https://mobile.facebook.com/{id}");
         let html = self.fetch_html(&url)?;
         let root = html.root_element();
 

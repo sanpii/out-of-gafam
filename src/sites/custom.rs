@@ -129,7 +129,7 @@ impl Custom {
 
         if let Some(x) = &attr {
             if x.contains('=') {
-                selector = format!("{}[{}]", selector, x);
+                selector = format!("{selector}[{x}]");
                 attr = None;
             }
         }

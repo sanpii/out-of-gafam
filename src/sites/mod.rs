@@ -98,7 +98,7 @@ pub trait Site {
     }
 
     fn og(&self, html: &scraper::html::Html, name: &str) -> crate::Result<String> {
-        let s = format!("html > head > meta[property=\"og:{}\"]", name);
+        let s = format!("html > head > meta[property=\"og:{name}\"]");
         let selector = scraper::Selector::parse(&s).unwrap();
 
         let element = match html.select(&selector).next() {

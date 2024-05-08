@@ -48,9 +48,9 @@ impl actix_web::error::ResponseError for Error {
         let status: actix_web::http::StatusCode = self.into();
 
         if status.is_client_error() {
-            log::warn!("{:?}", self);
+            log::warn!("{self:?}");
         } else if status.is_server_error() {
-            log::error!("{:?}", self);
+            log::error!("{self:?}");
         }
 
         let file = format!("errors/{}.html", u16::from(status));
@@ -58,7 +58,7 @@ impl actix_web::error::ResponseError for Error {
         let body = match template.render(&file, &tera::Context::new()) {
             Ok(body) => body,
             Err(err) => {
-                eprintln!("{:?}", err);
+                eprintln!("{err:?}");
 
                 "Internal server error".to_string()
             }

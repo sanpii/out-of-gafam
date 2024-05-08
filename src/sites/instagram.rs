@@ -15,14 +15,14 @@ impl crate::sites::Site for Instagram {
     }
 
     fn user(&self, _: &elephantry::Pool, id: &str, _: &str) -> crate::Result<crate::sites::User> {
-        let url = format!("https://www.instagram.com/{}/?__a=1", id);
+        let url = format!("https://www.instagram.com/{id}/?__a=1");
         let json = self.fetch_json(&url)?;
 
         let mut user = crate::sites::User {
             id: id.to_string(),
             name: json["graphql"]["user"]["username"].to_string(),
             description: Some(json["graphql"]["user"]["biography"].to_string()),
-            url: format!("https://www.instagram.com/{}", id),
+            url: format!("https://www.instagram.com/{id}"),
             image: Some(json["graphql"]["user"]["profile_pic_url"].to_string()),
             posts: vec![],
         };
@@ -39,11 +39,11 @@ impl crate::sites::Site for Instagram {
                 let thumbnail = &edge["node"]["thumbnail_src"];
                 let id = edge["node"]["shortcode"].to_string();
 
-                let message = format!("{}<br /><img src=\"{}\" />", caption, thumbnail);
+                let message = format!("{caption}<br /><img src=\"{thumbnail}\" />");
 
                 let post = crate::sites::Post {
                     name: "Post".to_string(),
-                    url: format!("https://www.instagram.com/p/{}", id),
+                    url: format!("https://www.instagram.com/p/{id}"),
                     message,
                     created_time: Self::parse_date(&edge["node"]["taken_at_timestamp"].to_string()),
                     id,
