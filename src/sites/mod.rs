@@ -2,14 +2,12 @@ mod custom;
 mod facebook;
 mod instagram;
 mod leboncoin;
-mod twitter;
 mod youtube;
 
 use custom::Custom;
 use facebook::Facebook;
 use instagram::Instagram;
 use leboncoin::Leboncoin;
-use twitter::Twitter;
 use youtube::Youtube;
 
 use std::collections::HashMap;
@@ -160,7 +158,6 @@ impl Sites {
         sites.insert("facebook", Box::<Facebook>::default());
         sites.insert("leboncoin", Box::<Leboncoin>::default());
         sites.insert("instagram", Box::<Instagram>::default());
-        sites.insert("twitter", Box::<Twitter>::default());
         sites.insert("youtube", Box::<Youtube>::default());
         sites.insert("custom", Box::<Custom>::default());
 
