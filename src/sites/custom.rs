@@ -73,7 +73,7 @@ impl Custom {
 
     fn get_one(root: &scraper::ElementRef<'_>, selector: Option<&String>) -> Option<String> {
         if let Some(selector) = selector {
-            Self::get_all(root, selector).get(0).cloned()
+            Self::get_all(root, selector).first().cloned()
         } else {
             None
         }

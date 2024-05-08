@@ -117,7 +117,7 @@ pub trait Site {
         element: &'a scraper::ElementRef<'_>,
         selector: &'static str,
     ) -> Option<scraper::ElementRef<'a>> {
-        self.select(element, selector).get(0).copied()
+        self.select(element, selector).first().copied()
     }
 
     fn select<'a>(
