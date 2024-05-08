@@ -1,13 +1,11 @@
 mod custom;
 mod facebook;
 mod instagram;
-mod leboncoin;
 mod youtube;
 
 use custom::Custom;
 use facebook::Facebook;
 use instagram::Instagram;
-use leboncoin::Leboncoin;
 use youtube::Youtube;
 
 use std::collections::HashMap;
@@ -34,10 +32,6 @@ pub struct Post {
 pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
     fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<self::User>;
-
-    fn post_json(&self, url: &str, body: &str) -> crate::Result<serde_json::Value> {
-        self.json(attohttpc::Method::POST, url, Some(body))
-    }
 
     fn fetch_json(&self, url: &str) -> crate::Result<serde_json::Value> {
         self.json(attohttpc::Method::GET, url, None)
@@ -156,7 +150,6 @@ impl Sites {
     pub fn new() -> Self {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::<Facebook>::default());
-        sites.insert("leboncoin", Box::<Leboncoin>::default());
         sites.insert("instagram", Box::<Instagram>::default());
         sites.insert("youtube", Box::<Youtube>::default());
         sites.insert("custom", Box::<Custom>::default());
