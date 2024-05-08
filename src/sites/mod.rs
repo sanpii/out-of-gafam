@@ -10,7 +10,7 @@ use youtube::Youtube;
 
 use std::collections::HashMap;
 
-#[derive(Debug, serde_derive::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct User {
     pub id: String,
     pub name: String,
@@ -20,7 +20,7 @@ pub struct User {
     pub posts: Vec<Post>,
 }
 
-#[derive(Debug, serde_derive::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct Post {
     pub id: String,
     pub name: String,

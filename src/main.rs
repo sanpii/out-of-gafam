@@ -14,7 +14,7 @@ struct AppData {
     elephantry: elephantry::Pool,
 }
 
-#[derive(serde_derive::Deserialize)]
+#[derive(serde::Deserialize)]
 struct Params {
     account: String,
 }
