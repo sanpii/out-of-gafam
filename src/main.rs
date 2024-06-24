@@ -23,10 +23,7 @@ static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 #[actix_web::main]
 async fn main() -> Result {
-    #[cfg(debug_assertions)]
-    envir::dotenv();
-
-    env_logger::init();
+    envir::init();
 
     let database_url = envir::get("DATABASE_URL")?;
     let ip = envir::get("LISTEN_IP")?;
