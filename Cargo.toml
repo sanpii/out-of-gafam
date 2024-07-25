@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Sanpi <sanpi@homecomputing.fr>"]
 edition = "2021"
 license = "MIT"
+rust-version = "1.80"
 
 [dependencies]
 actix-files = "0.6"
@@ -12,7 +13,6 @@ chrono = "0.4"
 chrono-english = "0.1"
 envir = "0.4"
 form_urlencoded = "1.0.0"
-lazy_static = "1.4"
 log = "0.4"
 regex = "1.0"
 scraper = "0.19"
