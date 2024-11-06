@@ -19,7 +19,7 @@ scraper = "0.21"
 serde_json = "1.0"
 tera = "1.0"
 tera-hot = "0.4"
-thiserror = "1.0"
+thiserror = "2.0"
 url = "2.2"
 urlencoding = "2.0"
 
