@@ -93,10 +93,10 @@ impl Facebook {
 
         let relative_time = regex.replace(text, "-$1 hours");
 
-        match chrono_english::parse_date_string(
+        match interim::parse_date_string(
             &relative_time,
             chrono::Local::now(),
-            chrono_english::Dialect::Uk,
+            interim::Dialect::Uk,
         ) {
             Ok(date) => date.to_string(),
             Err(_) => relative_time.to_string(),
