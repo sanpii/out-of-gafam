@@ -31,8 +31,8 @@ version = "4.0"
 features = ["uuid"]
 
 [dependencies.interim]
-version = "0.1"
-features = ["chrono"]
+version = "0.2"
+features = ["chrono_0_4"]
 
 [dependencies.serde]
 version = "1.0"
