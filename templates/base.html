@@ -15,27 +15,29 @@
     <body class="d-flex flex-column h-100">
         <header>
             <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                <a class="navbar-brand" href="#">Out Of GAFAM</a>
-                <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/about">About</a>
-                        </li>
-
-                    </ul>
-
-                    {% if site is defined and user.id is defined %}
-                        <ul class="navbar-nav mt-2 mt-md-0">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Out Of GAFAM</a>
+                    <div class="collapse navbar-collapse" id="navbarCollapse">
+                        <ul class="navbar-nav me-auto">
                             <li class="nav-item">
-                                <a class="nav-link" href="/feed/{{ site }}/{{ user.id }}">
-                                    <i class="fas fa-rss"></i>
-                                </a>
+                                <a class="nav-link" href="/">Home</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about">About</a>
+                            </li>
+
                         </ul>
-                    {% endif %}
+
+                        {% if site is defined and user.id is defined %}
+                            <ul class="navbar-nav mt-2 mt-md-0">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/feed/{{ site }}/{{ user.id }}">
+                                        <i class="fas fa-rss"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        {% endif %}
+                    </div>
                 </div>
             </nav>
         </header>
