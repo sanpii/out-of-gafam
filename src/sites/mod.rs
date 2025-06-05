@@ -1,11 +1,9 @@
 mod custom;
 mod facebook;
-mod instagram;
 mod youtube;
 
 use custom::Custom;
 use facebook::Facebook;
-use instagram::Instagram;
 use youtube::Youtube;
 
 use std::collections::HashMap;
@@ -33,27 +31,11 @@ pub trait Site {
     fn id(&self, url: &str) -> Option<String>;
     fn user(&self, elephantry: &elephantry::Pool, id: &str, _: &str) -> crate::Result<self::User>;
 
-    fn fetch_json(&self, url: &str) -> crate::Result<serde_json::Value> {
-        self.json(attohttpc::Method::GET, url, None)
-    }
-
     fn fetch_html(&self, url: &str) -> crate::Result<scraper::html::Html> {
         let contents = self.fetch(attohttpc::Method::GET, url, None)?;
         let html = scraper::Html::parse_document(&contents);
 
         Ok(html)
-    }
-
-    fn json(
-        &self,
-        method: attohttpc::Method,
-        url: &str,
-        body: Option<&str>,
-    ) -> crate::Result<serde_json::Value> {
-        let contents = self.fetch(method, url, body)?;
-        let json = serde_json::from_str(&contents)?;
-
-        Ok(json)
     }
 
     fn fetch(
@@ -149,7 +131,6 @@ impl Sites {
     pub fn new() -> Self {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
         sites.insert("facebook", Box::<Facebook>::default());
-        sites.insert("instagram", Box::<Instagram>::default());
         sites.insert("youtube", Box::<Youtube>::default());
         sites.insert("custom", Box::<Custom>::default());
 
