@@ -1,9 +1,7 @@
 mod custom;
-mod facebook;
 mod youtube;
 
 use custom::Custom;
-use facebook::Facebook;
 use youtube::Youtube;
 
 use std::collections::HashMap;
@@ -130,7 +128,6 @@ pub struct Sites {
 impl Sites {
     pub fn new() -> Self {
         let mut sites: HashMap<&'static str, Box<dyn Site>> = HashMap::new();
-        sites.insert("facebook", Box::<Facebook>::default());
         sites.insert("youtube", Box::<Youtube>::default());
         sites.insert("custom", Box::<Custom>::default());
 
