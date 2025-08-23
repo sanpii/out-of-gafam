@@ -127,11 +127,11 @@ impl Custom {
             None => (x.to_string(), None),
         };
 
-        if let Some(x) = &attr {
-            if x.contains('=') {
-                selector = format!("{selector}[{x}]");
-                attr = None;
-            }
+        if let Some(x) = &attr
+            && x.contains('=')
+        {
+            selector = format!("{selector}[{x}]");
+            attr = None;
         }
 
         (selector, attr)
