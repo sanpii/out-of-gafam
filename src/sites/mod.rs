@@ -105,9 +105,9 @@ pub trait Site {
         element: &'a scraper::ElementRef<'_>,
         selector: &'static str,
     ) -> Vec<scraper::ElementRef<'a>> {
-        static SELECTORS: std::sync::LazyLock<std::sync::Mutex<HashMap<&'static str, scraper::Selector>>> = std::sync::LazyLock::new(|| {
-            std::sync::Mutex::new(HashMap::new())
-        });
+        static SELECTORS: std::sync::LazyLock<
+            std::sync::Mutex<HashMap<&'static str, scraper::Selector>>,
+        > = std::sync::LazyLock::new(|| std::sync::Mutex::new(HashMap::new()));
 
         let mut selectors = (*SELECTORS).lock().unwrap();
 
